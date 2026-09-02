@@ -136,6 +136,11 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 | PUT | `/api/packing-lists/{locationId}/{season}` | save your edited list |
 | POST | `/api/packing-lists/{locationId}/{season}/reset` | regenerate from templates + inventory |
 | GET | `/api/search?q=...` | search inventory by name |
+| GET/POST | `/api/shopping-list` | list / add shopping list items |
+| PUT/DELETE | `/api/shopping-list/{id}` | update / delete a shopping list item |
+| PUT | `/api/shopping-list/{id}/checked` | mark bought / not bought |
+| GET/POST | `/api/custom-stores` | list / add your own stores (beyond the hardcoded starter list) |
+| DELETE | `/api/custom-stores/{id}` | remove a store you added |
 
 `season` is one of `VINTER`, `VAR`, `SOMMER`, `HOST` (ASCII names in the API/URLs; the frontend displays them as Vinter/Vår/Sommer/Høst).
 
@@ -161,6 +166,20 @@ For the photo-search path specifically, since SerpAPI's Google Lens engine needs
 
 ---
 
+## 9. Shopping list ("Handleliste")
+
+A simple "need to buy" list, separate from inventory. The **"Hvor skal det kjøpes?"** dropdown answers both "where" and "how", in three visually separate groups: **Bestilling** (Online), **Standard** (Hjemme, Hvor som helst), and **Steder** (your real locations) — Online and Hjemme are fixed convenience defaults, not real entries in Steder. The list groups into three sections in this order: **Bestilles på nett**, **Kjøpes hjemme**, **Kjøpes på destinasjonen**.
+
+For **Online** items (e.g. a steamer from Amazon Spain that needs lead time to arrive), you either set a **trip date** + **lead time in days** (the app computes an "order by" date, and a banner appears at the top once that date arrives), or check **"Vet ikke når jeg reiser ennå"** if you don't know yet — the item stays flagged with "⚠️ Mangler dato for påminnelse" until you come back and add one. Tap **📅** on any item with a date set to download a calendar reminder (`.ics`) with a built-in alarm — opening the downloaded file adds it straight to Calendar (Apple/Google/Outlook all support this) and fires a real notification on the order-by date. There's no public API to add directly to Apple's Reminders app from a website, so this targets Calendar instead — same practical result (a notification at the right time).
+
+Any item can also optionally have a **Butikk** (store) and a direct **product link**. The store field is a custom searchable dropdown (`frontend/src/components/StoreAutocomplete.tsx`) — native `<datalist>` was tried first but is unreliable on iOS Safari, hence the custom component. It searches a small hardcoded starter list (`frontend/src/stores.ts`) merged with stores **you've** added, persisted server-side via `/api/custom-stores` (so the list grows the more you use it, and syncs across devices). Typing a name that matches nothing offers **"➕ Legg til «name» som ny butikk"**, with an optional homepage URL field — adding the URL is worth doing, since it's what makes the product search below actually reliable for that store. Picking a known/saved store auto-attaches its homepage as a 🔗 link on the item.
+
+Once you've entered both an item name and a store, a **"🔍 Søk etter produktlenke"** button appears. When the store's URL is known, this searches Google (not Shopping) scoped to that store's site (`site:domain.com`) — Google Shopping only covers retailers in Google's own Shopping Graph, so it can come back empty for smaller/regional stores (e.g. Clas Ohlson) even when the product is right there on their site; a site-scoped regular search is far more reliable. Without a known store URL, it falls back to a generic Shopping search of "item + store name" (best-effort). Pick a result to fill in the product link automatically, or paste the exact URL into "Lenke til akkurat denne varen" if you already have it (that field always takes priority when set). This reuses the same SerpAPI setup as the [product photo lookup](#8-product-photo-lookup-optional) and shares its 100/month free-tier quota — see step 8.
+
+No setup needed for the store-name autocomplete, adding your own stores, or manual link paste. The "search for product link" button needs the same `SERPAPI_API_KEY` as step 8.
+
+---
+
 ## GDPR / privacy notes
 
 *Not legal advice — flagging what I see and how the code addresses it, so you can decide if you want a lawyer's opinion before inviting others.*
@@ -178,5 +197,5 @@ For the photo-search path specifically, since SerpAPI's Google Lens engine needs
 
 - Taking/uploading your own photos of items (only found-product photos, via the lookup feature, are supported)
 - Sharing/inviting friends (data model supports multi-user via `userId`, but there's no invite UI)
-- Notifications/reminders
+- In-app or push notifications (reminders work via exporting a Calendar event instead — see "Shopping list" section)
 - Account deletion endpoint (see GDPR notes above)

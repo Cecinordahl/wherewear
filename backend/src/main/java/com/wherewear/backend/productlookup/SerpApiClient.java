@@ -22,15 +22,22 @@ import static org.springframework.http.HttpStatus.BAD_GATEWAY;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 /**
- * Thin client for the two SerpAPI engines this app uses:
+ * Thin client for the SerpAPI engines this app uses:
  * - google_lens: reverse image search from a public image URL
- * - google_shopping: text -> product search
- * Free tier is 100 searches/month total across both. See README.
+ * - google_shopping: text -> product search (has images, but coverage is
+ *   patchy for smaller/regional retailers not in Google's Shopping Graph)
+ * - google (organic): text + "site:<domain>" -> a much more reliable way to
+ *   find a specific product page on a specific store's site, since regular
+ *   web search indexes far more broadly than Shopping - used when the store
+ *   picked in the shopping list has a known URL (see ProductLookupService).
+ * Region params are fixed to Norway since that's this app's context; free
+ * tier is 100 searches/month total across all of the above. See README.
  */
 @Component
 class SerpApiClient {
 
     private static final String BASE_URL = "https://serpapi.com/search.json";
+    private static final String REGION_PARAMS = "&gl=no&hl=no&google_domain=google.no";
     private static final int MAX_CANDIDATES = 12;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -45,18 +52,31 @@ class SerpApiClient {
         requireApiKey();
         String url = BASE_URL + "?engine=google_lens"
                 + "&url=" + encode(imageUrl)
+                + REGION_PARAMS
                 + "&api_key=" + encode(apiKey);
         JsonNode root = fetch(url);
-        return extractCandidates(root, "visual_matches");
+        return extractCandidates(root, "visual_matches", true);
     }
 
     List<ProductCandidate> searchByText(String query) {
         requireApiKey();
         String url = BASE_URL + "?engine=google_shopping"
                 + "&q=" + encode(query)
+                + REGION_PARAMS
                 + "&api_key=" + encode(apiKey);
         JsonNode root = fetch(url);
-        return extractCandidates(root, "shopping_results");
+        return extractCandidates(root, "shopping_results", true);
+    }
+
+    /** Regular web search scoped to one site - more reliable than Shopping for a specific known retailer. */
+    List<ProductCandidate> searchOnSite(String query, String siteDomain) {
+        requireApiKey();
+        String url = BASE_URL + "?engine=google"
+                + "&q=" + encode(query + " site:" + siteDomain)
+                + REGION_PARAMS
+                + "&api_key=" + encode(apiKey);
+        JsonNode root = fetch(url);
+        return extractCandidates(root, "organic_results", false);
     }
 
     private void requireApiKey() {
@@ -90,8 +110,9 @@ class SerpApiClient {
      * Defensively pulls out the handful of fields we need - SerpAPI's exact
      * response shape can vary slightly between engines/over time, so this
      * skips any entry missing what we need rather than failing the request.
+     * requireImage is false for organic web results, which don't carry one.
      */
-    private static List<ProductCandidate> extractCandidates(JsonNode root, String arrayField) {
+    private static List<ProductCandidate> extractCandidates(JsonNode root, String arrayField, boolean requireImage) {
         List<ProductCandidate> candidates = new ArrayList<>();
         JsonNode array = root.path(arrayField);
         if (!array.isArray()) {
@@ -99,11 +120,11 @@ class SerpApiClient {
         }
         for (JsonNode node : array) {
             String imageUrl = firstNonBlank(node, "thumbnail", "image", "original");
-            if (imageUrl == null) {
+            if (requireImage && imageUrl == null) {
                 continue;
             }
             String title = firstNonBlank(node, "title");
-            String source = firstNonBlank(node, "source");
+            String source = firstNonBlank(node, "source", "displayed_link");
             String pageUrl = firstNonBlank(node, "link", "source_url");
             candidates.add(new ProductCandidate(
                     title != null ? title : "Ukjent produkt",

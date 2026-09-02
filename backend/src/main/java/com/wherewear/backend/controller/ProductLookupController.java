@@ -30,7 +30,7 @@ public class ProductLookupController {
 
     @PostMapping("/by-text")
     public List<ProductCandidate> byText(@Valid @RequestBody TextSearchRequest request) {
-        return productLookupService.searchByText(request.query());
+        return productLookupService.searchByText(request.query(), request.storeName(), request.storeUrl());
     }
 
     @PostMapping(value = "/by-photo", consumes = "multipart/form-data")

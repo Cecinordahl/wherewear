@@ -7,6 +7,7 @@ import FindPhotoPage from "./routes/FindPhotoPage";
 import PackingListsPage from "./routes/PackingListsPage";
 import PackingListDetailPage from "./routes/PackingListDetailPage";
 import SearchPage from "./routes/SearchPage";
+import ShoppingListPage from "./routes/ShoppingListPage";
 
 function AppShell() {
   const { user, loading, signOut } = useAuth();
@@ -37,6 +38,7 @@ function AppShell() {
           <Route path="/packing-lists" element={<PackingListsPage />} />
           <Route path="/packing-lists/:locationId/:season" element={<PackingListDetailPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/shopping-list" element={<ShoppingListPage />} />
         </Routes>
       </main>
 
@@ -46,6 +48,9 @@ function AppShell() {
         </NavLink>
         <NavLink to="/packing-lists" className={({ isActive }) => (isActive ? "active" : "")}>
           Pakkelister
+        </NavLink>
+        <NavLink to="/shopping-list" className={({ isActive }) => (isActive ? "active" : "")}>
+          Handleliste
         </NavLink>
         <NavLink to="/search" className={({ isActive }) => (isActive ? "active" : "")}>
           Søk

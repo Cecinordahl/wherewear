@@ -39,5 +39,15 @@ service cloud.firestore {
       allow read, update, delete: if isOwner(resource.data);
       allow create: if isOwner(request.resource.data);
     }
+
+    match /shoppingListItems/{itemId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+
+    match /customStores/{storeId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
   }
 }

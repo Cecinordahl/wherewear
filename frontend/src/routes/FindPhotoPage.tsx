@@ -6,12 +6,20 @@ import type { ProductCandidate } from "../types";
 
 const DEBOUNCE_MS = 500;
 
+// This page always shows a photo per candidate, so only keep ones that have
+// one (in practice always true here - the underlying searches always
+// require an image).
+type PhotoCandidate = ProductCandidate & { imageUrl: string };
+function hasImage(c: ProductCandidate): c is PhotoCandidate {
+  return c.imageUrl !== null;
+}
+
 export default function FindPhotoPage() {
   const { locationId, itemId } = useParams<{ locationId: string; itemId: string }>();
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
-  const [candidates, setCandidates] = useState<ProductCandidate[] | null>(null);
+  const [candidates, setCandidates] = useState<PhotoCandidate[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +30,7 @@ export default function FindPhotoPage() {
     setLoading(true);
     setError(null);
     try {
-      setCandidates(await searcher());
+      setCandidates((await searcher()).filter(hasImage));
     } catch (err) {
       setError(describeError(err));
       setCandidates(null);
@@ -53,7 +61,7 @@ export default function FindPhotoPage() {
     void runSearch(() => productLookupApi.searchByPhoto(file));
   };
 
-  const handlePick = async (candidate: ProductCandidate) => {
+  const handlePick = async (candidate: PhotoCandidate) => {
     if (!itemId) return;
     setSaving(true);
     setError(null);

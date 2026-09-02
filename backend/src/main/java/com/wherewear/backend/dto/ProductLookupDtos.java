@@ -8,7 +8,9 @@ public class ProductLookupDtos {
     }
 
     public record TextSearchRequest(
-            @NotBlank String query
+            @NotBlank String query,
+            String storeName,
+            String storeUrl
     ) {
     }
 

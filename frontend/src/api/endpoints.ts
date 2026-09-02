@@ -1,6 +1,7 @@
 import { api } from "./client";
 import type {
   CategoryTemplate,
+  CustomStore,
   InventoryItem,
   Location,
   LocationType,
@@ -8,6 +9,7 @@ import type {
   ProductCandidate,
   Season,
   SearchResult,
+  ShoppingListItem,
 } from "../types";
 
 export const locationsApi = {
@@ -31,13 +33,19 @@ export const itemsApi = {
 };
 
 export const productLookupApi = {
-  searchByText: (query: string) =>
-    api.post<ProductCandidate[]>("/api/product-lookup/by-text", { query }),
+  searchByText: (query: string, storeName?: string | null, storeUrl?: string | null) =>
+    api.post<ProductCandidate[]>("/api/product-lookup/by-text", { query, storeName, storeUrl }),
   searchByPhoto: (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
     return api.postForm<ProductCandidate[]>("/api/product-lookup/by-photo", formData);
   },
+};
+
+export const customStoresApi = {
+  list: () => api.get<CustomStore[]>("/api/custom-stores"),
+  create: (name: string, url: string | null) => api.post<CustomStore>("/api/custom-stores", { name, url }),
+  remove: (id: string) => api.delete<void>(`/api/custom-stores/${id}`),
 };
 
 export const categoriesApi = {
@@ -66,4 +74,24 @@ export const packingListsApi = {
 
 export const searchApi = {
   search: (query: string) => api.get<SearchResult[]>(`/api/search?q=${encodeURIComponent(query)}`),
+};
+
+export interface ShoppingListItemInput {
+  name: string;
+  locationId: string | null;
+  tripDate: string | null;
+  leadTimeDays: number | null;
+  storeName: string | null;
+  storeUrl: string | null;
+  productUrl: string | null;
+}
+
+export const shoppingListApi = {
+  list: () => api.get<ShoppingListItem[]>("/api/shopping-list"),
+  create: (input: ShoppingListItemInput) => api.post<ShoppingListItem>("/api/shopping-list", input),
+  update: (id: string, input: ShoppingListItemInput) =>
+    api.put<ShoppingListItem>(`/api/shopping-list/${id}`, input),
+  setChecked: (id: string, checked: boolean) =>
+    api.put<ShoppingListItem>(`/api/shopping-list/${id}/checked`, { checked }),
+  remove: (id: string) => api.delete<void>(`/api/shopping-list/${id}`),
 };

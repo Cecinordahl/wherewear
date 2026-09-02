@@ -34,7 +34,13 @@ export interface ProductCandidate {
   title: string;
   source: string | null;
   pageUrl: string | null;
-  imageUrl: string;
+  imageUrl: string | null; // null for organic (site-scoped) web results, which don't carry a thumbnail
+}
+
+export interface CustomStore {
+  id: string;
+  name: string;
+  url: string | null;
 }
 
 export interface CategoryTemplate {
@@ -64,4 +70,24 @@ export interface SearchResult {
   category: string;
   locationId: string;
   locationName: string;
+}
+
+// Fixed pseudo-locations - not real Locations, just convenience defaults
+// (matches backend ShoppingListDtos sentinel constants).
+export const HOME_LOCATION_ID = "HOME";
+export const ONLINE_LOCATION_ID = "ONLINE";
+
+export interface ShoppingListItem {
+  id: string;
+  name: string;
+  locationId: string | null;
+  checked: boolean;
+  tripDate: string | null; // yyyy-MM-dd
+  leadTimeDays: number | null;
+  orderByDate: string | null; // yyyy-MM-dd, computed
+  dueSoon: boolean;
+  needsDate: boolean; // online, but no tripDate set yet
+  storeName: string | null;
+  storeUrl: string | null;
+  productUrl: string | null;
 }
