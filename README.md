@@ -196,7 +196,7 @@ Lets you bulk-add inventory items from a photo of a receipt instead of typing ea
    ```
 3. On Render: add `GEMINI_API_KEY` as an environment variable (see step 6.4 above).
 
-**Notes:** extraction quality depends on photo clarity and receipt layout - expect to correct a name or category occasionally, same "best-effort, you confirm" spirit as the other AI-assisted features. The model id is configurable via `GEMINI_MODEL` (defaults to `gemini-2.0-flash`) in case Google retires that model name later. Without a key configured, the feature shows a friendly "not set up yet" message — everything else in the app works fine regardless.
+**Notes:** extraction quality depends on photo clarity and receipt layout - expect to correct a name or category occasionally, same "best-effort, you confirm" spirit as the other AI-assisted features. The model id is configurable via `GEMINI_MODEL` (defaults to `gemini-2.5-flash`) in case Google retires that model name later - it already retired the original default (`gemini-2.0-flash`) once, as of Sept 2026, which is why this is an env var rather than hardcoded. If you ever see a "Gemini request failed: 404" error, that's this - check [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models) for the current model list and set `GEMINI_MODEL` accordingly. Without a key configured, the feature shows a friendly "not set up yet" message — everything else in the app works fine regardless.
 
 ---
 

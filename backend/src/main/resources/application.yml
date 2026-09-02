@@ -21,8 +21,9 @@ wherewear:
   gemini:
     # Free-tier key from Google AI Studio (aistudio.google.com). See README "Receipt import" section.
     api-key: ${GEMINI_API_KEY:}
-    # Override via env var if this model id is ever retired.
-    model: ${GEMINI_MODEL:gemini-2.0-flash}
+    # Override via env var if this model id is ever retired (gemini-2.0-flash
+    # already was, as of Sept 2026 - see README "Receipt import" section).
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
 
 spring:
   servlet:
