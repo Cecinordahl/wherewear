@@ -97,6 +97,7 @@ firebase deploy --only firestore
    - `FIREBASE_SERVICE_ACCOUNT_JSON` — paste the **entire contents** of the service-account JSON file from step 1.6, as a single value.
    - `WHEREWEAR_ALLOWED_ORIGINS` — `https://wherewear.vercel.app` (already set if using the Blueprint).
    - `SERPAPI_API_KEY` — optional, only needed for the product photo lookup feature (see step 8).
+   - `GEMINI_API_KEY` — optional, only needed for the receipt import feature (see step 10).
 5. Deploy. Note the resulting URL, e.g. `https://wherewear-backend.onrender.com` — you'll need it in step 7.
 
 **Free-tier limitation to know about:** Render's free web services "sleep" after ~15 minutes of no traffic, and the next request wakes it up — which can take 30-60 seconds (occasionally longer). The frontend handles this explicitly: right after sign-in, it polls `GET /api/health` (`frontend/src/components/BackendWakeGate.tsx`) and blocks the whole app behind a "Vekker serveren …" screen until the backend actually responds, so you can't submit a form into a sleeping backend and get a confusing failure. If it's still not responding after 90 seconds, it shows a retry button instead of waiting forever.
@@ -136,6 +137,7 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 | PUT | `/api/packing-lists/{locationId}/{season}` | save your edited list |
 | POST | `/api/packing-lists/{locationId}/{season}/reset` | regenerate from templates + inventory |
 | GET | `/api/search?q=...` | search inventory by name |
+| POST | `/api/receipt-import?locationType=...` | extract candidate items from a receipt photo (multipart) |
 | GET/POST | `/api/shopping-list` | list / add shopping list items |
 | PUT/DELETE | `/api/shopping-list/{id}` | update / delete a shopping list item |
 | PUT | `/api/shopping-list/{id}/checked` | mark bought / not bought |
@@ -177,6 +179,24 @@ Any item can also optionally have a **Butikk** (store) and a direct **product li
 Once you've entered both an item name and a store, a **"🔍 Søk etter produktlenke"** button appears. When the store's URL is known, this searches Google (not Shopping) scoped to that store's site (`site:domain.com`) — Google Shopping only covers retailers in Google's own Shopping Graph, so it can come back empty for smaller/regional stores (e.g. Clas Ohlson) even when the product is right there on their site; a site-scoped regular search is far more reliable. Without a known store URL, it falls back to a generic Shopping search of "item + store name" (best-effort). Pick a result to fill in the product link automatically, or paste the exact URL into "Lenke til akkurat denne varen" if you already have it (that field always takes priority when set). This reuses the same SerpAPI setup as the [product photo lookup](#8-product-photo-lookup-optional) and shares its 100/month free-tier quota — see step 8.
 
 No setup needed for the store-name autocomplete, adding your own stores, or manual link paste. The "search for product link" button needs the same `SERPAPI_API_KEY` as step 8.
+
+---
+
+## 10. Receipt import (optional)
+
+Lets you bulk-add inventory items from a photo of a receipt instead of typing each one in by hand. From a location's page, tap **"📄 Importer fra kvittering"** → take/upload a photo → the backend sends it to Gemini (Google's vision-capable LLM) asking it to list every purchased item with a clean name and the best-fitting category from that location's actual category list → you get an editable review screen. Every row defaults to the location you started from; you can rename an item, change its category, move it to a **different** location, or remove it entirely before tapping **"Legg til N varer"** to bulk-save.
+
+**Why Gemini and not Claude/GPT-4V:** Google AI Studio's Gemini API has a genuinely free tier, keeping this consistent with the rest of the app's free-tier integrations — a Claude/OpenAI vision call would work just as well technically, but costs real money per receipt.
+
+**Setup:**
+1. Go to [aistudio.google.com](https://aistudio.google.com) → sign in → **Get API key** → create one (free).
+2. Locally: add it to your backend run command, e.g.
+   ```bash
+   FIREBASE_SERVICE_ACCOUNT_PATH=~/secrets/wherewear-firebase.json GEMINI_API_KEY=your-key-here mvn spring-boot:run
+   ```
+3. On Render: add `GEMINI_API_KEY` as an environment variable (see step 6.4 above).
+
+**Notes:** extraction quality depends on photo clarity and receipt layout - expect to correct a name or category occasionally, same "best-effort, you confirm" spirit as the other AI-assisted features. The model id is configurable via `GEMINI_MODEL` (defaults to `gemini-2.0-flash`) in case Google retires that model name later. Without a key configured, the feature shows a friendly "not set up yet" message — everything else in the app works fine regardless.
 
 ---
 

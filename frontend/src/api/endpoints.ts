@@ -76,6 +76,22 @@ export const searchApi = {
   search: (query: string) => api.get<SearchResult[]>(`/api/search?q=${encodeURIComponent(query)}`),
 };
 
+export interface ReceiptItemCandidate {
+  name: string;
+  category: string;
+}
+
+export const receiptImportApi = {
+  extract: (locationType: LocationType, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.postForm<ReceiptItemCandidate[]>(
+      `/api/receipt-import?locationType=${locationType}`,
+      formData
+    );
+  },
+};
+
 export interface ShoppingListItemInput {
   name: string;
   locationId: string | null;

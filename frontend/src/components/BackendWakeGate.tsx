@@ -21,8 +21,6 @@ export default function BackendWakeGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     const start = Date.now();
-    setStatus("checking");
-    setWaitedSeconds(0);
 
     const tick = async () => {
       if (cancelled) return;
@@ -59,7 +57,14 @@ export default function BackendWakeGate({ children }: { children: ReactNode }) {
           <p className="card-subtitle">
             Den kan være nede, eller bruke uvanlig lang tid på å starte.
           </p>
-          <button className="btn" onClick={() => setRetryKey((k) => k + 1)}>
+          <button
+            className="btn"
+            onClick={() => {
+              setStatus("checking");
+              setWaitedSeconds(0);
+              setRetryKey((k) => k + 1);
+            }}
+          >
             Prøv igjen
           </button>
         </div>

@@ -12,3 +12,5 @@ services:
         value: https://wherewear.vercel.app
       - key: SERPAPI_API_KEY
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false

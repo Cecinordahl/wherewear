@@ -5,6 +5,7 @@ import LoginPage from "./routes/LoginPage";
 import LocationsPage from "./routes/LocationsPage";
 import LocationDetailPage from "./routes/LocationDetailPage";
 import FindPhotoPage from "./routes/FindPhotoPage";
+import ReceiptImportPage from "./routes/ReceiptImportPage";
 import PackingListsPage from "./routes/PackingListsPage";
 import PackingListDetailPage from "./routes/PackingListDetailPage";
 import SearchPage from "./routes/SearchPage";
@@ -37,6 +38,7 @@ function AppShell() {
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/locations/:locationId" element={<LocationDetailPage />} />
             <Route path="/locations/:locationId/items/:itemId/find-photo" element={<FindPhotoPage />} />
+            <Route path="/locations/:locationId/import-receipt" element={<ReceiptImportPage />} />
             <Route path="/packing-lists" element={<PackingListsPage />} />
             <Route path="/packing-lists/:locationId/:season" element={<PackingListDetailPage />} />
             <Route path="/search" element={<SearchPage />} />

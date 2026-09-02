@@ -103,6 +103,10 @@ export default function LocationDetailPage() {
         </button>
       </form>
 
+      <Link to={`/locations/${locationId}/import-receipt`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block", marginBottom: "1rem" }}>
+        📄 Importer fra kvittering
+      </Link>
+
       {items === null && <p className="empty-state">Laster …</p>}
 
       {itemsByCategory.map(

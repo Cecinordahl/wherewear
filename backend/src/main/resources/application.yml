@@ -18,6 +18,11 @@ wherewear:
   serpapi:
     # Free-tier key from serpapi.com (100 searches/month). See README "Product photo lookup" section.
     api-key: ${SERPAPI_API_KEY:}
+  gemini:
+    # Free-tier key from Google AI Studio (aistudio.google.com). See README "Receipt import" section.
+    api-key: ${GEMINI_API_KEY:}
+    # Override via env var if this model id is ever retired.
+    model: ${GEMINI_MODEL:gemini-2.0-flash}
 
 spring:
   servlet:
