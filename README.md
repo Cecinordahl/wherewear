@@ -99,7 +99,7 @@ firebase deploy --only firestore
    - `SERPAPI_API_KEY` — optional, only needed for the product photo lookup feature (see step 8).
 5. Deploy. Note the resulting URL, e.g. `https://wherewear-backend.onrender.com` — you'll need it in step 7.
 
-**Free-tier limitation to know about:** Render's free web services "sleep" after ~15 minutes of no traffic, and the next request wakes it up — which can take 30-60 seconds. The first packing-list load after a while idle may feel slow; that's this, not a bug.
+**Free-tier limitation to know about:** Render's free web services "sleep" after ~15 minutes of no traffic, and the next request wakes it up — which can take 30-60 seconds (occasionally longer). The frontend handles this explicitly: right after sign-in, it polls `GET /api/health` (`frontend/src/components/BackendWakeGate.tsx`) and blocks the whole app behind a "Vekker serveren …" screen until the backend actually responds, so you can't submit a form into a sleeping backend and get a confusing failure. If it's still not responding after 90 seconds, it shows a retry button instead of waiting forever.
 
 ---
 
