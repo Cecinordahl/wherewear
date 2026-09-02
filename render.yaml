@@ -10,3 +10,5 @@ services:
         sync: false
       - key: WHEREWEAR_ALLOWED_ORIGINS
         value: https://wherewear.vercel.app
+      - key: SERPAPI_API_KEY
+        sync: false

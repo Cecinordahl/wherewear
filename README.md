@@ -96,6 +96,7 @@ firebase deploy --only firestore
 4. Under the service's **Environment** tab, add:
    - `FIREBASE_SERVICE_ACCOUNT_JSON` — paste the **entire contents** of the service-account JSON file from step 1.6, as a single value.
    - `WHEREWEAR_ALLOWED_ORIGINS` — `https://wherewear.vercel.app` (already set if using the Blueprint).
+   - `SERPAPI_API_KEY` — optional, only needed for the product photo lookup feature (see step 8).
 5. Deploy. Note the resulting URL, e.g. `https://wherewear-backend.onrender.com` — you'll need it in step 7.
 
 **Free-tier limitation to know about:** Render's free web services "sleep" after ~15 minutes of no traffic, and the next request wakes it up — which can take 30-60 seconds. The first packing-list load after a while idle may feel slow; that's this, not a bug.
@@ -125,6 +126,9 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 | GET | `/api/locations/{locationId}/items` | inventory at a location |
 | POST | `/api/items` | add an inventory item |
 | PUT/DELETE | `/api/items/{id}` | update / delete an inventory item |
+| PUT | `/api/items/{id}/photo` | attach a found product photo to an item |
+| POST | `/api/product-lookup/by-text` | search for a product by name/description |
+| POST | `/api/product-lookup/by-photo` | search for a product by uploaded photo (multipart) |
 | GET | `/api/categories?locationType=FLIGHT\|CABIN` | fixed category list for that location type |
 | GET | `/api/category-templates?locationType=...` | your template item lists |
 | PUT | `/api/category-templates?locationType=...&category=...` | replace a template's item list |
@@ -137,6 +141,26 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 
 ---
 
+## 8. Product photo lookup (optional)
+
+Lets you find a real product photo for an item — by pasting/typing its name, or uploading a photo of it (e.g. an Instagram screenshot) — instead of taking your own picture. Tap the 📷 next to any inventory item that doesn't have a photo yet.
+
+**How it works:** the backend calls [SerpAPI](https://serpapi.com) (Google Shopping for text search, Google Lens for photo search), you pick the right match from the results, and the backend fetches + compresses that photo and stores it directly on the item (as a small base64 JPEG in Firestore — not Firebase Storage, so this stays on the free Spark plan; storing images inline like this is a deliberate MVP shortcut, fine at the scale of one wardrobe).
+
+For the photo-search path specifically, since SerpAPI's Google Lens engine needs a public URL (not a raw upload), your photo is briefly relayed through [0x0.st](https://0x0.st), a free anonymous file host, just long enough for SerpAPI to fetch it. It's a small third-party service (not Google-grade reliability), and the photo is technically public at an unguessable URL for a few seconds — worth knowing since it's your photo, however briefly public.
+
+**Setup:**
+1. Go to [serpapi.com](https://serpapi.com) → sign up (free) → **Your Account** → copy your **API Key**.
+2. Locally: add it to your backend run command, e.g.
+   ```bash
+   FIREBASE_SERVICE_ACCOUNT_PATH=~/secrets/wherewear-firebase.json SERPAPI_API_KEY=your-key-here mvn spring-boot:run
+   ```
+3. On Render: add `SERPAPI_API_KEY` as an environment variable (see step 6.4 above).
+
+**Free-tier limit:** 100 searches/month total (text + photo searches share the same pool). Without a key configured, the feature just shows a friendly "not set up yet" message — everything else in the app works fine regardless.
+
+---
+
 ## GDPR / privacy notes
 
 *Not legal advice — flagging what I see and how the code addresses it, so you can decide if you want a lawyer's opinion before inviting others.*
@@ -145,13 +169,14 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 - **Access control (implemented)**: `firestore.rules` enforces `request.auth.uid == resource.data.userId` on every collection, so one user's data is never readable or writable by another, even via a compromised or malicious frontend. This only protects **direct Firestore access** — since all client traffic actually goes through the Spring Boot backend (using the Admin SDK, which bypasses rules by design), the backend's own per-request auth check (`FirebaseAuthFilter` + ownership checks in each service) is the real enforcement point today. Keep the rules deployed anyway as defense-in-depth for if you ever add direct client-to-Firestore reads.
 - **Privacy notice**: not needed for solo use. **Before inviting friends**, add a short privacy notice (what's collected, why, that it's not shared between accounts, how to request deletion) — a simple static page is enough at this scale; you don't need a cookie banner since there's no tracking/analytics here.
 - **Data deletion**: there's currently no "delete my account and all my data" endpoint. Flag this as a **before-you-invite-others checklist item** — worth adding a `DELETE /api/me` that cascades through locations/items/templates/packingLists for that `userId`, since GDPR gives users a right to erasure once more than one person's data is involved.
-- **Data minimization**: the model already only stores what's needed (item names, categories, locations) — no photos, no location coordinates, no tracking. Good as-is.
+- **Data minimization**: the model stores what's needed (item names, categories, locations, and now optionally a product photo) — no location coordinates, no tracking.
+- **Third-party data flow (product photo lookup)**: using the optional photo-search feature sends the photo to SerpAPI (and briefly, to the anonymous file host 0x0.st) — both outside Google's ecosystem. This is opt-in per item (only triggered when you tap 📷) and only relevant once this feature is in use; worth knowing if you ever write a privacy notice for other users.
 
 ---
 
 ## What's not built yet (by design, per MVP scope)
 
-- Photos of items, AI-based item recognition
+- Taking/uploading your own photos of items (only found-product photos, via the lookup feature, are supported)
 - Sharing/inviting friends (data model supports multi-user via `userId`, but there's no invite UI)
 - Notifications/reminders
 - Account deletion endpoint (see GDPR notes above)

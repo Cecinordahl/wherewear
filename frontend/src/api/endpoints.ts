@@ -5,6 +5,7 @@ import type {
   Location,
   LocationType,
   PackingListData,
+  ProductCandidate,
   Season,
   SearchResult,
 } from "../types";
@@ -25,6 +26,18 @@ export const itemsApi = {
   update: (id: string, category: string, name: string) =>
     api.put<InventoryItem>(`/api/items/${id}`, { category, name }),
   remove: (id: string) => api.delete<void>(`/api/items/${id}`),
+  setPhoto: (id: string, sourceImageUrl: string) =>
+    api.put<InventoryItem>(`/api/items/${id}/photo`, { sourceImageUrl }),
+};
+
+export const productLookupApi = {
+  searchByText: (query: string) =>
+    api.post<ProductCandidate[]>("/api/product-lookup/by-text", { query }),
+  searchByPhoto: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.postForm<ProductCandidate[]>("/api/product-lookup/by-photo", formData);
+  },
 };
 
 export const categoriesApi = {

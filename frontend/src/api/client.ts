@@ -17,10 +17,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError(401, "Not signed in");
   }
 
+  const isFormData = options.body instanceof FormData;
+
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      // Let the browser set its own multipart Content-Type (with boundary) for FormData bodies.
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       Authorization: `Bearer ${idToken}`,
       ...options.headers,
     },
@@ -28,7 +31,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new ApiError(response.status, text || `Request to ${path} failed with ${response.status}`);
+    throw new ApiError(response.status, extractMessage(text) || `Request to ${path} failed with ${response.status}`);
   }
 
   if (response.status === 204) {
@@ -43,9 +46,20 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "POST", body: body !== undefined ? JSON.stringify(body) : undefined }),
+  postForm: <T>(path: string, formData: FormData) => request<T>(path, { method: "POST", body: formData }),
   put: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "PUT", body: body !== undefined ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
+
+/** Spring's default error body is JSON with a "message" field; fall back to the raw text if it's not JSON. */
+function extractMessage(text: string): string {
+  try {
+    const parsed = JSON.parse(text) as { message?: string };
+    return parsed.message ?? text;
+  } catch {
+    return text;
+  }
+}
 
 export { ApiError };

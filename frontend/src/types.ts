@@ -27,6 +27,14 @@ export interface InventoryItem {
   locationId: string;
   category: string;
   name: string;
+  photoDataUrl?: string;
+}
+
+export interface ProductCandidate {
+  title: string;
+  source: string | null;
+  pageUrl: string | null;
+  imageUrl: string;
 }
 
 export interface CategoryTemplate {

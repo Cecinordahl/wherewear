@@ -4,6 +4,7 @@ import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemRequest;
 import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemResponse;
 import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemUpdateRequest;
 import com.wherewear.backend.model.InventoryItem;
+import com.wherewear.backend.productlookup.ProductLookupService;
 import com.wherewear.backend.repository.InventoryItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,9 +18,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class InventoryItemService {
 
     private final InventoryItemRepository inventoryItemRepository;
+    private final ProductLookupService productLookupService;
 
-    public InventoryItemService(InventoryItemRepository inventoryItemRepository) {
+    public InventoryItemService(InventoryItemRepository inventoryItemRepository, ProductLookupService productLookupService) {
         this.inventoryItemRepository = inventoryItemRepository;
+        this.productLookupService = productLookupService;
     }
 
     public List<InventoryItemResponse> listForLocation(String userId, String locationId) {
@@ -49,6 +52,13 @@ public class InventoryItemService {
         inventoryItemRepository.deleteById(itemId);
     }
 
+    public InventoryItemResponse setPhoto(String userId, String itemId, String sourceImageUrl) {
+        InventoryItem existing = requireOwned(userId, itemId);
+        existing.setPhotoDataUrl(productLookupService.resolvePhotoDataUrl(sourceImageUrl));
+        existing.setUpdatedAt(null);
+        return toResponse(inventoryItemRepository.save(existing));
+    }
+
     private InventoryItem requireOwned(String userId, String itemId) {
         InventoryItem item = inventoryItemRepository.findById(itemId);
         if (item == null) {
@@ -61,6 +71,7 @@ public class InventoryItemService {
     }
 
     private static InventoryItemResponse toResponse(InventoryItem item) {
-        return new InventoryItemResponse(item.getId(), item.getLocationId(), item.getCategory(), item.getName());
+        return new InventoryItemResponse(
+                item.getId(), item.getLocationId(), item.getCategory(), item.getName(), item.getPhotoDataUrl());
     }
 }

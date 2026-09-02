@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import LoginPage from "./routes/LoginPage";
 import LocationsPage from "./routes/LocationsPage";
 import LocationDetailPage from "./routes/LocationDetailPage";
+import FindPhotoPage from "./routes/FindPhotoPage";
 import PackingListsPage from "./routes/PackingListsPage";
 import PackingListDetailPage from "./routes/PackingListDetailPage";
 import SearchPage from "./routes/SearchPage";
@@ -32,6 +33,7 @@ function AppShell() {
           <Route path="/" element={<Navigate to="/locations" replace />} />
           <Route path="/locations" element={<LocationsPage />} />
           <Route path="/locations/:locationId" element={<LocationDetailPage />} />
+          <Route path="/locations/:locationId/items/:itemId/find-photo" element={<FindPhotoPage />} />
           <Route path="/packing-lists" element={<PackingListsPage />} />
           <Route path="/packing-lists/:locationId/:season" element={<PackingListDetailPage />} />
           <Route path="/search" element={<SearchPage />} />

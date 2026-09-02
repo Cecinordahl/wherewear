@@ -20,11 +20,17 @@ public class InventoryItemDtos {
     ) {
     }
 
+    public record SetPhotoRequest(
+            @NotBlank String sourceImageUrl
+    ) {
+    }
+
     public record InventoryItemResponse(
             String id,
             String locationId,
             String category,
-            String name
+            String name,
+            String photoDataUrl
     ) {
     }
 }

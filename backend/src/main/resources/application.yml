@@ -1,5 +1,10 @@
 server:
   port: ${PORT:8080}
+  error:
+    # Personal single-user app - safe trade-off to surface the actual reason
+    # (e.g. "That URL isn't a readable image") instead of Spring's default
+    # blanked-out message, so failures are debuggable from the frontend alone.
+    include-message: always
 
 wherewear:
   # Path to the Firebase service account JSON key file (see README for how to get one).
@@ -10,6 +15,15 @@ wherewear:
     service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
   cors:
     allowed-origins: ${WHEREWEAR_ALLOWED_ORIGINS:http://localhost:5173,https://wherewear.vercel.app}
+  serpapi:
+    # Free-tier key from serpapi.com (100 searches/month). See README "Product photo lookup" section.
+    api-key: ${SERPAPI_API_KEY:}
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 8MB
 
 logging:
   level:

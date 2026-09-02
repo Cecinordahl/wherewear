@@ -113,6 +113,22 @@ export default function LocationDetailPage() {
               <ul className="checklist">
                 {categoryItems.map((item) => (
                   <li key={item.id} className="checklist-item">
+                    {item.photoDataUrl ? (
+                      <img
+                        src={item.photoDataUrl}
+                        alt=""
+                        style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
+                      />
+                    ) : (
+                      <Link
+                        to={`/locations/${locationId}/items/${item.id}/find-photo`}
+                        className="icon-btn"
+                        aria-label="Finn produktbilde"
+                        title="Finn produktbilde"
+                      >
+                        📷
+                      </Link>
+                    )}
                     <label>{item.name}</label>
                     <button
                       className="icon-btn"

@@ -15,6 +15,12 @@ public class InventoryItem {
     private String category;
     private String name;
 
+    // A compressed "data:image/jpeg;base64,..." string, populated when the
+    // user picks a matched product photo via the product-lookup feature.
+    // Stored inline on the doc (not Firebase Storage) to stay on the free
+    // Firestore Spark plan - see README "Product photo lookup" section.
+    private String photoDataUrl;
+
     @ServerTimestamp
     private Date createdAt;
 
@@ -62,6 +68,14 @@ public class InventoryItem {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhotoDataUrl() {
+        return photoDataUrl;
+    }
+
+    public void setPhotoDataUrl(String photoDataUrl) {
+        this.photoDataUrl = photoDataUrl;
     }
 
     public Date getCreatedAt() {
