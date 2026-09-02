@@ -1,0 +1,16 @@
+server:
+  port: ${PORT:8080}
+
+wherewear:
+  # Path to the Firebase service account JSON key file (see README for how to get one).
+  # Locally, point this at a file on disk. On Render, we instead read the JSON
+  # directly from an env var (FIREBASE_SERVICE_ACCOUNT_JSON) - see FirebaseConfig.
+  firebase:
+    service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:}
+    service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
+  cors:
+    allowed-origins: ${WHEREWEAR_ALLOWED_ORIGINS:http://localhost:5173,https://wherewear.vercel.app}
+
+logging:
+  level:
+    com.wherewear: INFO

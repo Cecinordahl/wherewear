@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Every document in every collection carries a userId field set to the
+// Firebase Auth uid of its owner. These rules enforce that a signed-in
+// user can only ever read or write their own documents — this is the
+// concrete access-control mitigation for the single-owner-account model
+// described in the project's GDPR notes.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && request.auth.uid == data.userId;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /locations/{locationId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+
+    match /inventoryItems/{itemId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+
+    match /categoryTemplates/{templateId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+
+    match /packingLists/{packingListId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+  }
+}

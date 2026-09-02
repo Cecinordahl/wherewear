@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: wherewear-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: WHEREWEAR_ALLOWED_ORIGINS
+        value: https://wherewear.vercel.app
