@@ -49,5 +49,10 @@ service cloud.firestore {
       allow read, update, delete: if isOwner(resource.data);
       allow create: if isOwner(request.resource.data);
     }
+
+    match /customCategories/{categoryId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
   }
 }

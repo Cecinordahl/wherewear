@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ApiError } from "../api/client";
 import { categoriesApi, itemsApi, locationsApi } from "../api/endpoints";
 import type { InventoryItem, Location } from "../types";
 
@@ -12,6 +13,9 @@ export default function LocationDetailPage() {
   const [newItemName, setNewItemName] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
   const [saving, setSaving] = useState(false);
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [savingCategory, setSavingCategory] = useState(false);
 
   const loadItems = () => {
     if (!locationId) return;
@@ -56,6 +60,23 @@ export default function LocationDetailPage() {
     }
   };
 
+  const handleSaveNewCategory = async () => {
+    if (!location || !newCategoryName.trim()) return;
+    setSavingCategory(true);
+    setError(null);
+    try {
+      const updated = await categoriesApi.create(location.type, newCategoryName.trim());
+      setCategories(updated);
+      setNewItemCategory(newCategoryName.trim());
+      setAddingCategory(false);
+      setNewCategoryName("");
+    } catch (err) {
+      setError(err instanceof ApiError && err.message ? err.message : "Klarte ikke å legge til kategorien.");
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
   const handleDeleteItem = async (id: string) => {
     setError(null);
     try {
@@ -91,14 +112,56 @@ export default function LocationDetailPage() {
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
         />
-        <select value={newItemCategory} onChange={(e) => setNewItemCategory(e.target.value)}>
+        <select
+          value={newItemCategory}
+          onChange={(e) => {
+            if (e.target.value === "__new__") {
+              setAddingCategory(true);
+            } else {
+              setNewItemCategory(e.target.value);
+            }
+          }}
+        >
           {categories.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
           ))}
+          <option value="__new__">+ Ny kategori</option>
         </select>
-        <button className="btn" type="submit" disabled={saving || !newItemName.trim()}>
+
+        {addingCategory && (
+          <div className="row">
+            <input
+              type="text"
+              placeholder="Navn på ny kategori"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => void handleSaveNewCategory()}
+              disabled={savingCategory || !newCategoryName.trim()}
+            >
+              Lagre
+            </button>
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Avbryt"
+              onClick={() => {
+                setAddingCategory(false);
+                setNewCategoryName("");
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        <button className="btn" type="submit" disabled={saving || !newItemName.trim() || addingCategory}>
           Legg til
         </button>
       </form>

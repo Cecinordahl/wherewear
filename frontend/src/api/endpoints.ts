@@ -51,6 +51,8 @@ export const customStoresApi = {
 export const categoriesApi = {
   forLocationType: (locationType: LocationType) =>
     api.get<string[]>(`/api/categories?locationType=${locationType}`),
+  create: (locationType: LocationType, name: string) =>
+    api.post<string[]>("/api/categories", { locationType, name }),
 };
 
 export const categoryTemplatesApi = {

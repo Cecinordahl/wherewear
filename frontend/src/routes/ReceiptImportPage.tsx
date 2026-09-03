@@ -25,6 +25,9 @@ export default function ReceiptImportPage() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setBlocked, confirmLeave } = useUnsavedChanges();
+  const [addingCategoryForRowId, setAddingCategoryForRowId] = useState<string | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [savingCategory, setSavingCategory] = useState(false);
 
   useEffect(() => {
     setBlocked(extracting || (rows !== null && rows.length > 0));
@@ -76,6 +79,23 @@ export default function ReceiptImportPage() {
 
   const removeRow = (id: string) => {
     setRows((prev) => prev?.filter((r) => r.id !== id) ?? null);
+  };
+
+  const handleSaveNewCategory = async (rowId: string) => {
+    if (!location || !newCategoryName.trim()) return;
+    setSavingCategory(true);
+    setError(null);
+    try {
+      const updated = await categoriesApi.create(location.type, newCategoryName.trim());
+      setCategories(updated);
+      updateRow(rowId, { category: newCategoryName.trim() });
+      setAddingCategoryForRowId(null);
+      setNewCategoryName("");
+    } catch (err) {
+      setError(err instanceof ApiError && err.message ? err.message : "Klarte ikke å legge til kategorien.");
+    } finally {
+      setSavingCategory(false);
+    }
   };
 
   const handleSaveAll = async () => {
@@ -151,7 +171,13 @@ export default function ReceiptImportPage() {
                   <div className="row">
                     <select
                       value={row.category}
-                      onChange={(e) => updateRow(row.id, { category: e.target.value })}
+                      onChange={(e) => {
+                        if (e.target.value === "__new__") {
+                          setAddingCategoryForRowId(row.id);
+                        } else {
+                          updateRow(row.id, { category: e.target.value });
+                        }
+                      }}
                       style={{ flex: 1 }}
                     >
                       {categories.map((c) => (
@@ -159,6 +185,7 @@ export default function ReceiptImportPage() {
                           {c}
                         </option>
                       ))}
+                      <option value="__new__">+ Ny kategori</option>
                     </select>
                     <select
                       value={row.locationId}
@@ -172,6 +199,37 @@ export default function ReceiptImportPage() {
                       ))}
                     </select>
                   </div>
+
+                  {addingCategoryForRowId === row.id && (
+                    <div className="row">
+                      <input
+                        type="text"
+                        placeholder="Navn på ny kategori"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        onClick={() => void handleSaveNewCategory(row.id)}
+                        disabled={savingCategory || !newCategoryName.trim()}
+                      >
+                        Lagre
+                      </button>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        aria-label="Avbryt"
+                        onClick={() => {
+                          setAddingCategoryForRowId(null);
+                          setNewCategoryName("");
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <button className="icon-btn" onClick={() => removeRow(row.id)} aria-label="Fjern">
                   ✕
