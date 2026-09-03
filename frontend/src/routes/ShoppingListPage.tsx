@@ -14,6 +14,7 @@ export default function ShoppingListPage() {
   const [customStores, setCustomStores] = useState<CustomStore[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [locationId, setLocationId] = useState(ANYWHERE);
   const [dateUnknown, setDateUnknown] = useState(false);
@@ -69,6 +70,7 @@ export default function ShoppingListPage() {
   };
 
   const resetForm = () => {
+    setEditingId(null);
     setName("");
     setLocationId(ANYWHERE);
     setDateUnknown(false);
@@ -78,6 +80,26 @@ export default function ShoppingListPage() {
     setProductUrl("");
     setProductCandidates(null);
     setProductSearchError(null);
+  };
+
+  const startEdit = (item: ShoppingListItem) => {
+    setEditingId(item.id);
+    setName(item.name);
+    setLocationId(item.locationId ?? ANYWHERE);
+    setStoreName(item.storeName ?? "");
+    setProductUrl(item.productUrl ?? "");
+    setProductCandidates(null);
+    setProductSearchError(null);
+    if (item.locationId === ONLINE_LOCATION_ID) {
+      setDateUnknown(!item.tripDate);
+      setTripDate(item.tripDate ?? "");
+      setLeadTimeDays(item.leadTimeDays ?? 10);
+    } else {
+      setDateUnknown(false);
+      setTripDate("");
+      setLeadTimeDays(10);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSearchProduct = async () => {
@@ -100,20 +122,25 @@ export default function ShoppingListPage() {
     if (!name.trim()) return;
     setSaving(true);
     setError(null);
+    const input = {
+      name: name.trim(),
+      locationId: locationId || null,
+      tripDate: isOnline && !dateUnknown && tripDate ? tripDate : null,
+      leadTimeDays: isOnline && !dateUnknown && tripDate ? leadTimeDays : null,
+      storeName: storeName.trim() || null,
+      storeUrl: storeName.trim() ? findStoreUrl(storeName) : null,
+      productUrl: productUrl.trim() || null,
+    };
     try {
-      await shoppingListApi.create({
-        name: name.trim(),
-        locationId: locationId || null,
-        tripDate: isOnline && !dateUnknown && tripDate ? tripDate : null,
-        leadTimeDays: isOnline && !dateUnknown && tripDate ? leadTimeDays : null,
-        storeName: storeName.trim() || null,
-        storeUrl: storeName.trim() ? findStoreUrl(storeName) : null,
-        productUrl: productUrl.trim() || null,
-      });
+      if (editingId) {
+        await shoppingListApi.update(editingId, input);
+      } else {
+        await shoppingListApi.create(input);
+      }
       resetForm();
       load();
     } catch {
-      setError("Klarte ikke å legge til.");
+      setError(editingId ? "Klarte ikke å lagre endringene." : "Klarte ikke å legge til.");
     } finally {
       setSaving(false);
     }
@@ -303,9 +330,16 @@ export default function ShoppingListPage() {
           </div>
         )}
 
-        <button className="btn" type="submit" disabled={saving || !name.trim()}>
-          Legg til
-        </button>
+        <div className="row">
+          <button className="btn" type="submit" disabled={saving || !name.trim()}>
+            {editingId ? "Lagre endringer" : "Legg til"}
+          </button>
+          {editingId && (
+            <button type="button" className="btn secondary" onClick={resetForm}>
+              Avbryt redigering
+            </button>
+          )}
+        </div>
       </form>
 
       <ShoppingListSection
@@ -313,6 +347,7 @@ export default function ShoppingListPage() {
         items={onlineItems}
         locationName={locationName}
         onToggle={toggleChecked}
+        onEdit={startEdit}
         onDelete={handleDelete}
         onAddToCalendar={handleAddToCalendar}
       />
@@ -321,6 +356,7 @@ export default function ShoppingListPage() {
         items={homeItems}
         locationName={locationName}
         onToggle={toggleChecked}
+        onEdit={startEdit}
         onDelete={handleDelete}
         onAddToCalendar={handleAddToCalendar}
       />
@@ -329,6 +365,7 @@ export default function ShoppingListPage() {
         items={destinationItems}
         locationName={locationName}
         onToggle={toggleChecked}
+        onEdit={startEdit}
         onDelete={handleDelete}
         onAddToCalendar={handleAddToCalendar}
         showLocationTag
@@ -344,6 +381,9 @@ export default function ShoppingListPage() {
               <li key={item.id} className="checklist-item checked">
                 <input type="checkbox" checked={item.checked} onChange={() => void toggleChecked(item)} />
                 <label>{item.name}</label>
+                <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Rediger">
+                  ✏️
+                </button>
                 <button className="icon-btn" onClick={() => void handleDelete(item.id)} aria-label="Slett">
                   ✕
                 </button>
@@ -361,6 +401,7 @@ function ShoppingListSection({
   items,
   locationName,
   onToggle,
+  onEdit,
   onDelete,
   onAddToCalendar,
   showLocationTag,
@@ -369,6 +410,7 @@ function ShoppingListSection({
   items: ShoppingListItem[];
   locationName: (id: string | null) => string;
   onToggle: (item: ShoppingListItem) => void;
+  onEdit: (item: ShoppingListItem) => void;
   onDelete: (id: string) => void;
   onAddToCalendar: (item: ShoppingListItem) => void;
   showLocationTag?: boolean;
@@ -408,6 +450,9 @@ function ShoppingListSection({
                   📅
                 </button>
               )}
+              <button className="icon-btn" onClick={() => onEdit(item)} aria-label="Rediger">
+                ✏️
+              </button>
               <button className="icon-btn" onClick={() => onDelete(item.id)} aria-label="Slett">
                 ✕
               </button>
