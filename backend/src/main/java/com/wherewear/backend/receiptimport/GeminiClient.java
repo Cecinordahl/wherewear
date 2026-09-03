@@ -63,24 +63,53 @@ class GeminiClient {
         root.putObject("generationConfig").put("responseMimeType", "application/json");
 
         String url = BASE_URL + model + ":generateContent?key=" + encode(apiKey);
-
+        String requestBody;
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .timeout(Duration.ofSeconds(45))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(root)))
-                    .build();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                throw new ResponseStatusException(BAD_GATEWAY, "Gemini request failed: " + response.statusCode());
+            requestBody = objectMapper.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
+        }
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(45))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        // Gemini's free tier routinely returns 503 ("model overloaded") /
+        // 429 (rate limited) under load - both transient, so retry a couple
+        // times with backoff before giving up.
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    JsonNode responseRoot = objectMapper.readTree(response.body());
+                    return responseRoot.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText();
+                }
+                boolean transientError = response.statusCode() == 503 || response.statusCode() == 429;
+                if (!transientError || attempt == maxAttempts) {
+                    throw new ResponseStatusException(BAD_GATEWAY, "Gemini request failed: " + response.statusCode());
+                }
+            } catch (IOException | InterruptedException e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
+                }
+                if (attempt == maxAttempts) {
+                    throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
+                }
             }
-            JsonNode responseRoot = objectMapper.readTree(response.body());
-            return responseRoot.path("candidates").path(0).path("content").path("parts").path(0).path("text").asText();
-        } catch (IOException | InterruptedException e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+            sleepBeforeRetry(attempt);
+        }
+        throw new ResponseStatusException(BAD_GATEWAY, "Gemini request failed after retries");
+    }
+
+    private static void sleepBeforeRetry(int attempt) {
+        try {
+            Thread.sleep(Duration.ofMillis(500L * attempt));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
         }
     }
