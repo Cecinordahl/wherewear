@@ -130,7 +130,8 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 | PUT | `/api/items/{id}/photo` | attach a found product photo to an item |
 | POST | `/api/product-lookup/by-text` | search for a product by name/description |
 | POST | `/api/product-lookup/by-photo` | search for a product by uploaded photo (multipart) |
-| GET | `/api/categories?locationType=FLIGHT\|CABIN` | fixed category list for that location type |
+| GET | `/api/categories?locationType=FLIGHT\|CABIN` | category list for that location type (built-in + any you've added) |
+| POST | `/api/categories` | add a custom category for a location type |
 | GET | `/api/category-templates?locationType=...` | your template item lists |
 | PUT | `/api/category-templates?locationType=...&category=...` | replace a template's item list |
 | GET | `/api/packing-lists/{locationId}/{season}` | get (or first-time generate) a packing list |
