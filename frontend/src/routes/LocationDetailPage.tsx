@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { categoriesApi, itemsApi, locationsApi } from "../api/endpoints";
+import EmojiPicker from "../components/EmojiPicker";
 import type { InventoryItem, Location } from "../types";
 
 export default function LocationDetailPage() {
@@ -18,6 +19,9 @@ export default function LocationDetailPage() {
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [savingCategory, setSavingCategory] = useState(false);
+  const [editingIcon, setEditingIcon] = useState(false);
+  const [iconDraft, setIconDraft] = useState("");
+  const [savingIcon, setSavingIcon] = useState(false);
 
   const loadItems = () => {
     if (!locationId) return;
@@ -97,6 +101,21 @@ export default function LocationDetailPage() {
     }
   };
 
+  const handleSaveIcon = async () => {
+    if (!location) return;
+    setSavingIcon(true);
+    setError(null);
+    try {
+      const updated = await locationsApi.update(location.id, location.name, location.type, iconDraft.trim() || null);
+      setLocation(updated);
+      setEditingIcon(false);
+    } catch {
+      setError("Klarte ikke å lagre emojien.");
+    } finally {
+      setSavingIcon(false);
+    }
+  };
+
   const handleDeleteItem = async (id: string) => {
     setError(null);
     try {
@@ -121,7 +140,33 @@ export default function LocationDetailPage() {
       <Link to="/locations" className="card-subtitle">
         ← Steder
       </Link>
-      <h2 style={{ marginTop: "0.4rem" }}>{location.name}</h2>
+      <div className="row" style={{ marginTop: "0.4rem", alignItems: "center" }}>
+        <h2 style={{ margin: 0 }}>
+          {location.icon ?? "🎯"} {location.name}
+        </h2>
+        <button
+          className="icon-btn"
+          aria-label="Endre emoji"
+          onClick={() => {
+            setIconDraft(location.icon ?? "");
+            setEditingIcon((open) => !open);
+          }}
+        >
+          ✎
+        </button>
+      </div>
+
+      {editingIcon && (
+        <div className="row" style={{ marginBottom: "0.8rem" }}>
+          <EmojiPicker value={iconDraft} onChange={setIconDraft} />
+          <button type="button" className="btn secondary" onClick={() => void handleSaveIcon()} disabled={savingIcon}>
+            Lagre
+          </button>
+          <button type="button" className="icon-btn" aria-label="Avbryt" onClick={() => setEditingIcon(false)}>
+            ✕
+          </button>
+        </div>
+      )}
 
       {error && <div className="error-banner">{error}</div>}
 

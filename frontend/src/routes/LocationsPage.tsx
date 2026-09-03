@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { locationsApi } from "../api/endpoints";
+import EmojiPicker from "../components/EmojiPicker";
 import type { Location, LocationType } from "../types";
 import { LOCATION_TYPE_LABELS } from "../types";
 
@@ -85,12 +86,12 @@ export default function LocationsPage() {
           <option value="FLIGHT">{LOCATION_TYPE_LABELS.FLIGHT}</option>
           <option value="CABIN">{LOCATION_TYPE_LABELS.CABIN}</option>
         </select>
-        <input
-          type="text"
-          placeholder="Emoji (valgfritt), f.eks. 🇪🇸 - brukes bl.a. som ikon på handlelisten"
-          value={icon}
-          onChange={(e) => setIcon(e.target.value)}
-        />
+        <div>
+          <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
+            Emoji (valgfritt) - brukes bl.a. som ikon på handlelisten
+          </label>
+          <EmojiPicker value={icon} onChange={setIcon} />
+        </div>
         <button className="btn" type="submit" disabled={saving || !name.trim()}>
           Legg til sted
         </button>
@@ -120,13 +121,7 @@ export default function LocationsPage() {
 
           {editingIconId === location.id && (
             <div className="row">
-              <input
-                type="text"
-                placeholder="Emoji, f.eks. 🇪🇸"
-                value={iconDraft}
-                onChange={(e) => setIconDraft(e.target.value)}
-                style={{ flex: 1 }}
-              />
+              <EmojiPicker value={iconDraft} onChange={setIconDraft} />
               <button
                 type="button"
                 className="btn secondary"
