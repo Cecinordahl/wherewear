@@ -91,7 +91,8 @@ class GeminiClient {
                 }
                 boolean transientError = response.statusCode() == 503 || response.statusCode() == 429;
                 if (!transientError || attempt == maxAttempts) {
-                    throw new ResponseStatusException(BAD_GATEWAY, "Gemini request failed: " + response.statusCode());
+                    throw new ResponseStatusException(BAD_GATEWAY,
+                            "Gemini request failed: " + response.statusCode() + " - " + extractErrorMessage(response.body()));
                 }
             } catch (IOException | InterruptedException e) {
                 if (e instanceof InterruptedException) {
@@ -105,6 +106,14 @@ class GeminiClient {
             sleepBeforeRetry(attempt);
         }
         throw new ResponseStatusException(BAD_GATEWAY, "Gemini request failed after retries");
+    }
+
+    private String extractErrorMessage(String responseBody) {
+        try {
+            return objectMapper.readTree(responseBody).path("error").path("message").asText("(no detail)");
+        } catch (IOException e) {
+            return "(no detail)";
+        }
     }
 
     private static void sleepBeforeRetry(int attempt) {
