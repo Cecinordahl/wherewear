@@ -15,6 +15,7 @@ public class ShoppingListDtos {
     public record ShoppingListItemRequest(
             @NotBlank String name,
             String locationId,
+            String neededForLocationId,
             String tripDate,
             @Min(0) Integer leadTimeDays,
             String storeName,
@@ -27,6 +28,7 @@ public class ShoppingListDtos {
             String id,
             String name,
             String locationId,
+            String neededForLocationId,
             boolean checked,
             String tripDate,
             Integer leadTimeDays,

@@ -18,6 +18,13 @@ public class ShoppingListItem {
     // null for "anywhere". See ShoppingListDtos for the sentinel constants.
     private String locationId;
 
+    // Which wardrobe/Location this item is actually needed for - independent
+    // of locationId (where/how to buy it). E.g. buy in Norway (locationId
+    // HOME) for the Spain wardrobe (neededForLocationId = that Location's
+    // id). Always a real Location id or null ("no particular wardrobe"),
+    // never the ONLINE/HOME purchase sentinels.
+    private String neededForLocationId;
+
     private boolean checked;
 
     // Optional "order in time for a trip" reminder, only meaningful when
@@ -77,6 +84,14 @@ public class ShoppingListItem {
 
     public void setLocationId(String locationId) {
         this.locationId = locationId;
+    }
+
+    public String getNeededForLocationId() {
+        return neededForLocationId;
+    }
+
+    public void setNeededForLocationId(String neededForLocationId) {
+        this.neededForLocationId = neededForLocationId;
     }
 
     public boolean isChecked() {

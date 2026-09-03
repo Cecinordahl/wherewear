@@ -17,6 +17,7 @@ export default function ShoppingListPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [locationId, setLocationId] = useState(ANYWHERE);
+  const [neededForLocationId, setNeededForLocationId] = useState(ANYWHERE);
   const [dateUnknown, setDateUnknown] = useState(false);
   const [tripDate, setTripDate] = useState("");
   const [leadTimeDays, setLeadTimeDays] = useState(10);
@@ -73,6 +74,7 @@ export default function ShoppingListPage() {
     setEditingId(null);
     setName("");
     setLocationId(ANYWHERE);
+    setNeededForLocationId(ANYWHERE);
     setDateUnknown(false);
     setTripDate("");
     setLeadTimeDays(10);
@@ -86,6 +88,7 @@ export default function ShoppingListPage() {
     setEditingId(item.id);
     setName(item.name);
     setLocationId(item.locationId ?? ANYWHERE);
+    setNeededForLocationId(item.neededForLocationId ?? ANYWHERE);
     setStoreName(item.storeName ?? "");
     setProductUrl(item.productUrl ?? "");
     setProductCandidates(null);
@@ -125,6 +128,7 @@ export default function ShoppingListPage() {
     const input = {
       name: name.trim(),
       locationId: locationId || null,
+      neededForLocationId: neededForLocationId || null,
       tripDate: isOnline && !dateUnknown && tripDate ? tripDate : null,
       leadTimeDays: isOnline && !dateUnknown && tripDate ? leadTimeDays : null,
       storeName: storeName.trim() || null,
@@ -229,6 +233,20 @@ export default function ShoppingListPage() {
                 </option>
               ))}
             </optgroup>
+          </select>
+        </div>
+
+        <div>
+          <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
+            Hvilken garderobe trengs det til?
+          </label>
+          <select value={neededForLocationId} onChange={(e) => setNeededForLocationId(e.target.value)}>
+            <option value={ANYWHERE}>Ingen bestemt</option>
+            {locations.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -380,7 +398,12 @@ export default function ShoppingListPage() {
             {checkedItems.map((item) => (
               <li key={item.id} className="checklist-item checked">
                 <input type="checkbox" checked={item.checked} onChange={() => void toggleChecked(item)} />
-                <label>{item.name}</label>
+                <label style={{ display: "flex", flexDirection: "column" }}>
+                  <span>{item.name}</span>
+                  {item.neededForLocationId && (
+                    <span className="card-subtitle">🎯 {locationName(item.neededForLocationId)}</span>
+                  )}
+                </label>
                 <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Rediger">
                   ✏️
                 </button>
@@ -423,22 +446,31 @@ function ShoppingListSection({
       <ul className="checklist">
         {items.map((item) => {
           const link = item.productUrl || item.storeUrl;
+          const subtitleParts: React.ReactNode[] = [];
+          if (showLocationTag) subtitleParts.push(locationName(item.locationId));
+          if (item.neededForLocationId) subtitleParts.push(`🎯 ${locationName(item.neededForLocationId)}`);
+          if (item.storeName) subtitleParts.push(item.storeName);
+          if (item.orderByDate) subtitleParts.push(`bestill innen ${item.orderByDate}`);
+          if (item.needsDate) {
+            subtitleParts.push(
+              <span style={{ color: "var(--danger)" }}>⚠️ Mangler dato for påminnelse</span>
+            );
+          }
           return (
             <li key={item.id} className="checklist-item">
               <input type="checkbox" checked={item.checked} onChange={() => onToggle(item)} />
               <label style={{ display: "flex", flexDirection: "column" }}>
                 <span>{item.name}</span>
-                <span className="card-subtitle">
-                  {showLocationTag && locationName(item.locationId)}
-                  {item.storeName && `${showLocationTag ? " · " : ""}${item.storeName}`}
-                  {item.orderByDate &&
-                    `${showLocationTag || item.storeName ? " · " : ""}bestill innen ${item.orderByDate}`}
-                  {item.needsDate && (
-                    <span style={{ color: "var(--danger)" }}>
-                      {showLocationTag || item.storeName ? " · " : ""}⚠️ Mangler dato for påminnelse
-                    </span>
-                  )}
-                </span>
+                {subtitleParts.length > 0 && (
+                  <span className="card-subtitle">
+                    {subtitleParts.map((part, i) => (
+                      <span key={i}>
+                        {i > 0 && " · "}
+                        {part}
+                      </span>
+                    ))}
+                  </span>
+                )}
               </label>
               {link && (
                 <a href={link} target="_blank" rel="noreferrer" className="icon-btn" title="Åpne lenke">

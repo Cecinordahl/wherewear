@@ -58,6 +58,7 @@ public class ShoppingListService {
     private static void applyRequest(ShoppingListItem item, ShoppingListItemRequest request) {
         item.setName(request.name());
         item.setLocationId(request.locationId());
+        item.setNeededForLocationId(blankToNull(request.neededForLocationId()));
         boolean online = ONLINE_LOCATION_ID.equals(request.locationId());
         // A date/lead-time only means anything for an online order.
         item.setTripDate(online ? request.tripDate() : null);
@@ -91,6 +92,7 @@ public class ShoppingListService {
                 item.getId(),
                 item.getName(),
                 item.getLocationId(),
+                item.getNeededForLocationId(),
                 item.isChecked(),
                 item.getTripDate(),
                 item.getLeadTimeDays(),

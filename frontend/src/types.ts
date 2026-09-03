@@ -82,6 +82,7 @@ export interface ShoppingListItem {
   id: string;
   name: string;
   locationId: string | null;
+  neededForLocationId: string | null;
   checked: boolean;
   tripDate: string | null; // yyyy-MM-dd
   leadTimeDays: number | null;

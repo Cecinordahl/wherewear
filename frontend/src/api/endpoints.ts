@@ -98,6 +98,7 @@ export const receiptImportApi = {
 export interface ShoppingListItemInput {
   name: string;
   locationId: string | null;
+  neededForLocationId: string | null;
   tripDate: string | null;
   leadTimeDays: number | null;
   storeName: string | null;
