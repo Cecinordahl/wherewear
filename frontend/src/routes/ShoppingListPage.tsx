@@ -184,12 +184,18 @@ export default function ShoppingListPage() {
   }
 
   const dueSoonItems = items.filter((i) => i.dueSoon);
-  const onlineItems = items.filter((i) => !i.checked && i.locationId === ONLINE_LOCATION_ID);
-  const homeItems = items.filter((i) => !i.checked && i.locationId === HOME_LOCATION_ID);
-  const destinationItems = items.filter(
-    (i) => !i.checked && i.locationId !== ONLINE_LOCATION_ID && i.locationId !== HOME_LOCATION_ID
-  );
+  const uncheckedItems = items.filter((i) => !i.checked);
   const checkedItems = items.filter((i) => i.checked);
+
+  // Group by wardrobe destination first (in the same order as `locations`,
+  // with "no particular wardrobe" last), then within each by where it's
+  // purchased - these are independent (buy in Norway for the Spain wardrobe).
+  const wardrobeGroups: { wardrobeId: string | null; items: ShoppingListItem[] }[] = [
+    ...locations
+      .map((l) => ({ wardrobeId: l.id, items: uncheckedItems.filter((i) => i.neededForLocationId === l.id) }))
+      .filter((g) => g.items.length > 0),
+    { wardrobeId: null, items: uncheckedItems.filter((i) => !i.neededForLocationId) },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <div>
@@ -360,34 +366,48 @@ export default function ShoppingListPage() {
         </div>
       </form>
 
-      <ShoppingListSection
-        title="Bestilles på nett"
-        items={onlineItems}
-        locationName={locationName}
-        onToggle={toggleChecked}
-        onEdit={startEdit}
-        onDelete={handleDelete}
-        onAddToCalendar={handleAddToCalendar}
-      />
-      <ShoppingListSection
-        title="Kjøpes hjemme"
-        items={homeItems}
-        locationName={locationName}
-        onToggle={toggleChecked}
-        onEdit={startEdit}
-        onDelete={handleDelete}
-        onAddToCalendar={handleAddToCalendar}
-      />
-      <ShoppingListSection
-        title="Kjøpes på destinasjonen"
-        items={destinationItems}
-        locationName={locationName}
-        onToggle={toggleChecked}
-        onEdit={startEdit}
-        onDelete={handleDelete}
-        onAddToCalendar={handleAddToCalendar}
-        showLocationTag
-      />
+      {wardrobeGroups.map(({ wardrobeId, items: groupItems }) => {
+        const onlineItems = groupItems.filter((i) => i.locationId === ONLINE_LOCATION_ID);
+        const homeItems = groupItems.filter((i) => i.locationId === HOME_LOCATION_ID);
+        const destinationItems = groupItems.filter(
+          (i) => i.locationId !== ONLINE_LOCATION_ID && i.locationId !== HOME_LOCATION_ID
+        );
+        return (
+          <div key={wardrobeId ?? "none"} style={{ marginTop: "1.2rem" }}>
+            <h3 style={{ marginBottom: "0.2rem" }}>
+              🎯 {wardrobeId ? locationName(wardrobeId) : "Ingen bestemt garderobe"}
+            </h3>
+            <ShoppingListSection
+              title="Bestilles på nett"
+              items={onlineItems}
+              locationName={locationName}
+              onToggle={toggleChecked}
+              onEdit={startEdit}
+              onDelete={handleDelete}
+              onAddToCalendar={handleAddToCalendar}
+            />
+            <ShoppingListSection
+              title="Kjøpes hjemme"
+              items={homeItems}
+              locationName={locationName}
+              onToggle={toggleChecked}
+              onEdit={startEdit}
+              onDelete={handleDelete}
+              onAddToCalendar={handleAddToCalendar}
+            />
+            <ShoppingListSection
+              title="Kjøpes på destinasjonen"
+              items={destinationItems}
+              locationName={locationName}
+              onToggle={toggleChecked}
+              onEdit={startEdit}
+              onDelete={handleDelete}
+              onAddToCalendar={handleAddToCalendar}
+              showLocationTag
+            />
+          </div>
+        );
+      })}
 
       {items.length === 0 && <p className="empty-state">Handlelisten er tom.</p>}
 
@@ -448,7 +468,6 @@ function ShoppingListSection({
           const link = item.productUrl || item.storeUrl;
           const subtitleParts: React.ReactNode[] = [];
           if (showLocationTag) subtitleParts.push(locationName(item.locationId));
-          if (item.neededForLocationId) subtitleParts.push(`🎯 ${locationName(item.neededForLocationId)}`);
           if (item.storeName) subtitleParts.push(item.storeName);
           if (item.orderByDate) subtitleParts.push(`bestill innen ${item.orderByDate}`);
           if (item.needsDate) {
