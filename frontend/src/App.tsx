@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import BackendWakeGate from "./components/BackendWakeGate";
+import { UnsavedChangesProvider, useUnsavedChanges } from "./navigation/UnsavedChangesContext";
 import LoginPage from "./routes/LoginPage";
 import LocationsPage from "./routes/LocationsPage";
 import LocationDetailPage from "./routes/LocationDetailPage";
@@ -13,6 +14,10 @@ import ShoppingListPage from "./routes/ShoppingListPage";
 
 function AppShell() {
   const { user, loading, signOut } = useAuth();
+  const { confirmLeave } = useUnsavedChanges();
+  const guardNav = (e: React.MouseEvent) => {
+    if (!confirmLeave()) e.preventDefault();
+  };
 
   if (loading) {
     return <div className="centered">Laster …</div>;
@@ -47,16 +52,16 @@ function AppShell() {
         </main>
 
         <nav className="app-nav">
-          <NavLink to="/locations" className={({ isActive }) => (isActive ? "active" : "")}>
+          <NavLink to="/locations" onClick={guardNav} className={({ isActive }) => (isActive ? "active" : "")}>
             Steder
           </NavLink>
-          <NavLink to="/packing-lists" className={({ isActive }) => (isActive ? "active" : "")}>
+          <NavLink to="/packing-lists" onClick={guardNav} className={({ isActive }) => (isActive ? "active" : "")}>
             Pakkelister
           </NavLink>
-          <NavLink to="/shopping-list" className={({ isActive }) => (isActive ? "active" : "")}>
+          <NavLink to="/shopping-list" onClick={guardNav} className={({ isActive }) => (isActive ? "active" : "")}>
             Handleliste
           </NavLink>
-          <NavLink to="/search" className={({ isActive }) => (isActive ? "active" : "")}>
+          <NavLink to="/search" onClick={guardNav} className={({ isActive }) => (isActive ? "active" : "")}>
             Søk
           </NavLink>
         </nav>
@@ -68,7 +73,9 @@ function AppShell() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <UnsavedChangesProvider>
+        <AppShell />
+      </UnsavedChangesProvider>
     </AuthProvider>
   );
 }

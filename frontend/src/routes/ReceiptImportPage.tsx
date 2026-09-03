@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { categoriesApi, itemsApi, locationsApi, receiptImportApi } from "../api/endpoints";
+import { useUnsavedChanges } from "../navigation/UnsavedChangesContext";
 import type { Location } from "../types";
 
 interface ReviewRow {
@@ -23,6 +24,13 @@ export default function ReceiptImportPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setBlocked, confirmLeave } = useUnsavedChanges();
+
+  useEffect(() => {
+    setBlocked(extracting || (rows !== null && rows.length > 0));
+  }, [extracting, rows, setBlocked]);
+
+  useEffect(() => () => setBlocked(false), [setBlocked]);
 
   useEffect(() => {
     if (!locationId) return;
@@ -78,6 +86,7 @@ export default function ReceiptImportPage() {
       for (const row of rows) {
         await itemsApi.create(row.locationId, row.category, row.name);
       }
+      setBlocked(false);
       navigate(`/locations/${locationId}`);
     } catch {
       setError("Noe gikk galt underveis - sjekk hva som ble lagt til før du prøver igjen.");
@@ -91,7 +100,13 @@ export default function ReceiptImportPage() {
 
   return (
     <div>
-      <Link to={`/locations/${locationId}`} className="card-subtitle">
+      <Link
+        to={`/locations/${locationId}`}
+        className="card-subtitle"
+        onClick={(e) => {
+          if (!confirmLeave()) e.preventDefault();
+        }}
+      >
         ← {location.name}
       </Link>
       <h2 style={{ marginTop: "0.4rem" }}>Importer fra kvittering</h2>
@@ -177,6 +192,9 @@ function describeError(err: unknown): string {
   if (err instanceof ApiError) {
     if (err.status === 503) {
       return "Kvitteringsimport er ikke satt opp ennå (mangler GEMINI_API_KEY).";
+    }
+    if (err.message.includes("Gemini request failed: 503") || err.message.includes("Gemini request failed: 429")) {
+      return "Gemini er overbelastet akkurat nå - prøv igjen om litt.";
     }
     if (err.message) {
       return err.message;
