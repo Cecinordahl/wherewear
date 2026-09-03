@@ -9,11 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 
@@ -62,17 +60,21 @@ class GeminiClient {
                 .put("data", Base64.getEncoder().encodeToString(imageBytes));
         root.putObject("generationConfig").put("responseMimeType", "application/json");
 
-        String url = BASE_URL + model + ":generateContent?key=" + encode(apiKey);
+        String url = BASE_URL + model + ":generateContent";
         String requestBody;
         try {
             requestBody = objectMapper.writeValueAsString(root);
         } catch (IOException e) {
             throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
         }
+        // Newer Google-issued keys (the "AQ." prefix format) 401 with
+        // ACCESS_TOKEN_TYPE_UNSUPPORTED when passed as a ?key= query param -
+        // the x-goog-api-key header works for both old (AIza...) and new key formats.
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(45))
                 .header("Content-Type", "application/json")
+                .header("x-goog-api-key", apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
@@ -112,9 +114,5 @@ class GeminiClient {
             Thread.currentThread().interrupt();
             throw new ResponseStatusException(BAD_GATEWAY, "Failed to reach Gemini", e);
         }
-    }
-
-    private static String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
