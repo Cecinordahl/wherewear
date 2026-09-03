@@ -427,7 +427,7 @@ export default function ShoppingListPage() {
                   )}
                 </label>
                 <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Rediger">
-                  ✏️
+                  ✎
                 </button>
                 <button className="icon-btn" onClick={() => void handleDelete(item.id)} aria-label="Slett">
                   ✕
@@ -504,7 +504,7 @@ function ShoppingListSection({
                 </button>
               )}
               <button className="icon-btn" onClick={() => onEdit(item)} aria-label="Rediger">
-                ✏️
+                ✎
               </button>
               <button className="icon-btn" onClick={() => onDelete(item.id)} aria-label="Slett">
                 ✕

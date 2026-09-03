@@ -110,7 +110,7 @@ export default function LocationsPage() {
             </Link>
             <div className="row">
               <button className="icon-btn" onClick={() => startEditIcon(location)} aria-label="Endre emoji">
-                ✏️
+                ✎
               </button>
               <button className="icon-btn" onClick={() => void handleDelete(location.id)} aria-label="Slett">
                 ✕

@@ -10,6 +10,7 @@ export default function LocationDetailPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [items, setItems] = useState<InventoryItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState("");
   const [newItemBrand, setNewItemBrand] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
@@ -51,15 +52,32 @@ export default function LocationDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      await itemsApi.create(locationId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
-      setNewItemName("");
-      setNewItemBrand("");
+      if (editingItemId) {
+        await itemsApi.update(editingItemId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
+      } else {
+        await itemsApi.create(locationId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
+      }
+      cancelEditItem();
       loadItems();
     } catch {
-      setError("Klarte ikke å legge til.");
+      setError(editingItemId ? "Klarte ikke å lagre endringene." : "Klarte ikke å legge til.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const startEditItem = (item: InventoryItem) => {
+    setEditingItemId(item.id);
+    setNewItemName(item.name);
+    setNewItemBrand(item.brand ?? "");
+    setNewItemCategory(item.category);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEditItem = () => {
+    setEditingItemId(null);
+    setNewItemName("");
+    setNewItemBrand("");
   };
 
   const handleSaveNewCategory = async () => {
@@ -169,9 +187,16 @@ export default function LocationDetailPage() {
           </div>
         )}
 
-        <button className="btn" type="submit" disabled={saving || !newItemName.trim() || addingCategory}>
-          Legg til
-        </button>
+        <div className="row">
+          <button className="btn" type="submit" disabled={saving || !newItemName.trim() || addingCategory}>
+            {editingItemId ? "Lagre endringer" : "Legg til"}
+          </button>
+          {editingItemId && (
+            <button type="button" className="btn secondary" onClick={cancelEditItem}>
+              Avbryt redigering
+            </button>
+          )}
+        </div>
       </form>
 
       <Link to={`/locations/${locationId}/import-receipt`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block", marginBottom: "1rem" }}>
@@ -208,6 +233,9 @@ export default function LocationDetailPage() {
                       {item.name}
                       {item.brand && <span className="card-subtitle"> · {item.brand}</span>}
                     </label>
+                    <button className="icon-btn" onClick={() => startEditItem(item)} aria-label="Rediger">
+                      ✎
+                    </button>
                     <button
                       className="icon-btn"
                       onClick={() => void handleDeleteItem(item.id)}
