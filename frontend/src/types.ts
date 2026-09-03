@@ -20,6 +20,7 @@ export interface Location {
   id: string;
   name: string;
   type: LocationType;
+  icon?: string | null;
 }
 
 export interface InventoryItem {

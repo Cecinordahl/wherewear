@@ -11,14 +11,16 @@ public class LocationDtos {
 
     public record LocationRequest(
             @NotBlank String name,
-            @NotNull LocationType type
+            @NotNull LocationType type,
+            String icon
     ) {
     }
 
     public record LocationResponse(
             String id,
             String name,
-            LocationType type
+            LocationType type,
+            String icon
     ) {
     }
 }

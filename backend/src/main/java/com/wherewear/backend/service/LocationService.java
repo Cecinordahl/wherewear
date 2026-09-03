@@ -30,6 +30,7 @@ public class LocationService {
         location.setUserId(userId);
         location.setName(request.name());
         location.setType(request.type());
+        location.setIcon(blankToNull(request.icon()));
         return toResponse(locationRepository.save(location));
     }
 
@@ -37,6 +38,7 @@ public class LocationService {
         Location existing = requireOwned(userId, locationId);
         existing.setName(request.name());
         existing.setType(request.type());
+        existing.setIcon(blankToNull(request.icon()));
         existing.setUpdatedAt(null); // let @ServerTimestamp refresh it
         return toResponse(locationRepository.save(existing));
     }
@@ -58,6 +60,10 @@ public class LocationService {
     }
 
     private static LocationResponse toResponse(Location location) {
-        return new LocationResponse(location.getId(), location.getName(), location.getType());
+        return new LocationResponse(location.getId(), location.getName(), location.getType(), location.getIcon());
+    }
+
+    private static String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }

@@ -375,7 +375,9 @@ export default function ShoppingListPage() {
         return (
           <div key={wardrobeId ?? "none"} style={{ marginTop: "1.2rem" }}>
             <h3 style={{ marginBottom: "0.2rem" }}>
-              🎯 {wardrobeId ? locationName(wardrobeId) : "Ingen bestemt garderobe"}
+              {wardrobeId
+                ? `${locations.find((l) => l.id === wardrobeId)?.icon ?? "🎯"} ${locationName(wardrobeId)}`
+                : "🎯 Ingen bestemt garderobe"}
             </h3>
             <ShoppingListSection
               title="Bestilles på nett"

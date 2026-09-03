@@ -14,9 +14,10 @@ import type {
 
 export const locationsApi = {
   list: () => api.get<Location[]>("/api/locations"),
-  create: (name: string, type: LocationType) => api.post<Location>("/api/locations", { name, type }),
-  update: (id: string, name: string, type: LocationType) =>
-    api.put<Location>(`/api/locations/${id}`, { name, type }),
+  create: (name: string, type: LocationType, icon?: string | null) =>
+    api.post<Location>("/api/locations", { name, type, icon: icon ?? null }),
+  update: (id: string, name: string, type: LocationType, icon?: string | null) =>
+    api.put<Location>(`/api/locations/${id}`, { name, type, icon: icon ?? null }),
   remove: (id: string) => api.delete<void>(`/api/locations/${id}`),
 };
 
