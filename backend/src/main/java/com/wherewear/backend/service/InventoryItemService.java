@@ -36,6 +36,7 @@ public class InventoryItemService {
         item.setLocationId(request.locationId());
         item.setCategory(request.category());
         item.setName(request.name());
+        item.setBrand(blankToNull(request.brand()));
         return toResponse(inventoryItemRepository.save(item));
     }
 
@@ -43,6 +44,7 @@ public class InventoryItemService {
         InventoryItem existing = requireOwned(userId, itemId);
         existing.setCategory(request.category());
         existing.setName(request.name());
+        existing.setBrand(blankToNull(request.brand()));
         existing.setUpdatedAt(null);
         return toResponse(inventoryItemRepository.save(existing));
     }
@@ -72,6 +74,10 @@ public class InventoryItemService {
 
     private static InventoryItemResponse toResponse(InventoryItem item) {
         return new InventoryItemResponse(
-                item.getId(), item.getLocationId(), item.getCategory(), item.getName(), item.getPhotoDataUrl());
+                item.getId(), item.getLocationId(), item.getCategory(), item.getName(), item.getBrand(), item.getPhotoDataUrl());
+    }
+
+    private static String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }

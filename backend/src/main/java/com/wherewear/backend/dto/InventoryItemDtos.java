@@ -10,13 +10,15 @@ public class InventoryItemDtos {
     public record InventoryItemRequest(
             @NotBlank String locationId,
             @NotBlank String category,
-            @NotBlank String name
+            @NotBlank String name,
+            String brand
     ) {
     }
 
     public record InventoryItemUpdateRequest(
             @NotBlank String category,
-            @NotBlank String name
+            @NotBlank String name,
+            String brand
     ) {
     }
 
@@ -30,6 +32,7 @@ public class InventoryItemDtos {
             String locationId,
             String category,
             String name,
+            String brand,
             String photoDataUrl
     ) {
     }

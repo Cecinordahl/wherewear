@@ -23,10 +23,10 @@ export const locationsApi = {
 export const itemsApi = {
   listForLocation: (locationId: string) =>
     api.get<InventoryItem[]>(`/api/locations/${locationId}/items`),
-  create: (locationId: string, category: string, name: string) =>
-    api.post<InventoryItem>("/api/items", { locationId, category, name }),
-  update: (id: string, category: string, name: string) =>
-    api.put<InventoryItem>(`/api/items/${id}`, { category, name }),
+  create: (locationId: string, category: string, name: string, brand?: string | null) =>
+    api.post<InventoryItem>("/api/items", { locationId, category, name, brand: brand ?? null }),
+  update: (id: string, category: string, name: string, brand?: string | null) =>
+    api.put<InventoryItem>(`/api/items/${id}`, { category, name, brand: brand ?? null }),
   remove: (id: string) => api.delete<void>(`/api/items/${id}`),
   setPhoto: (id: string, sourceImageUrl: string) =>
     api.put<InventoryItem>(`/api/items/${id}/photo`, { sourceImageUrl }),
@@ -81,6 +81,7 @@ export const searchApi = {
 export interface ReceiptItemCandidate {
   name: string;
   category: string;
+  brand: string | null;
 }
 
 export const receiptImportApi = {

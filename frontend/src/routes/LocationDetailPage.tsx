@@ -11,6 +11,7 @@ export default function LocationDetailPage() {
   const [items, setItems] = useState<InventoryItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState("");
+  const [newItemBrand, setNewItemBrand] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
   const [saving, setSaving] = useState(false);
   const [addingCategory, setAddingCategory] = useState(false);
@@ -50,8 +51,9 @@ export default function LocationDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      await itemsApi.create(locationId, newItemCategory, newItemName.trim());
+      await itemsApi.create(locationId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
       setNewItemName("");
+      setNewItemBrand("");
       loadItems();
     } catch {
       setError("Klarte ikke å legge til.");
@@ -111,6 +113,12 @@ export default function LocationDetailPage() {
           placeholder="Ny ting, f.eks. Blå ullgenser"
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Merke (valgfritt)"
+          value={newItemBrand}
+          onChange={(e) => setNewItemBrand(e.target.value)}
         />
         <select
           value={newItemCategory}
@@ -196,7 +204,10 @@ export default function LocationDetailPage() {
                         📷
                       </Link>
                     )}
-                    <label>{item.name}</label>
+                    <label>
+                      {item.name}
+                      {item.brand && <span className="card-subtitle"> · {item.brand}</span>}
+                    </label>
                     <button
                       className="icon-btn"
                       onClick={() => void handleDeleteItem(item.id)}

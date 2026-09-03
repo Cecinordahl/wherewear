@@ -47,10 +47,11 @@ public class ReceiptImportService {
                 details, store info, and standalone ref/RFID code lines).
                 For each item, write a short, clean, human-readable product name (translate and clean
                 up cryptic abbreviations if needed - e.g. "TS COMFORT LITE W MULTI WHITE MAGNOLIA 38"
-                could become "Hvit magnolia t-skjorte, str 38"), and pick the single best-fitting
-                category from exactly this list: %s.
+                could become "Hvit magnolia t-skjorte, str 38"), pick the single best-fitting
+                category from exactly this list: %s, and if a brand name is identifiable (from the
+                store name, a logo, or the item description) include it - otherwise omit it or use null.
                 Respond with ONLY a JSON array, no other text, in this shape:
-                [{"name": "...", "category": "..."}]
+                [{"name": "...", "category": "...", "brand": "..." or null}]
                 """.formatted(String.join(", ", categories));
     }
 
@@ -76,7 +77,8 @@ public class ReceiptImportService {
             if (category == null || !validCategories.contains(category)) {
                 category = fallbackCategory;
             }
-            candidates.add(new ReceiptItemCandidate(name.trim(), category));
+            String brand = node.path("brand").asText(null);
+            candidates.add(new ReceiptItemCandidate(name.trim(), category, brand != null && !brand.isBlank() ? brand.trim() : null));
         }
         return candidates;
     }

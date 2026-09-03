@@ -14,6 +14,7 @@ public class InventoryItem {
     private String locationId;
     private String category;
     private String name;
+    private String brand;
 
     // A compressed "data:image/jpeg;base64,..." string, populated when the
     // user picks a matched product photo via the product-lookup feature.
@@ -68,6 +69,14 @@ public class InventoryItem {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public String getPhotoDataUrl() {

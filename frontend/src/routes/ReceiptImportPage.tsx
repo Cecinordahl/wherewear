@@ -9,6 +9,7 @@ interface ReviewRow {
   id: string;
   name: string;
   category: string;
+  brand: string;
   locationId: string;
 }
 
@@ -63,6 +64,7 @@ export default function ReceiptImportPage() {
           id: `${Date.now()}-${i}`,
           name: c.name,
           category: c.category,
+          brand: c.brand ?? "",
           locationId: location.id,
         }))
       );
@@ -104,7 +106,7 @@ export default function ReceiptImportPage() {
     setError(null);
     try {
       for (const row of rows) {
-        await itemsApi.create(row.locationId, row.category, row.name);
+        await itemsApi.create(row.locationId, row.category, row.name, row.brand.trim() || null);
       }
       setBlocked(false);
       navigate(`/locations/${locationId}`);
@@ -167,6 +169,12 @@ export default function ReceiptImportPage() {
                     type="text"
                     value={row.name}
                     onChange={(e) => updateRow(row.id, { name: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Merke (valgfritt)"
+                    value={row.brand}
+                    onChange={(e) => updateRow(row.id, { brand: e.target.value })}
                   />
                   <div className="row">
                     <select

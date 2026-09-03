@@ -27,6 +27,7 @@ export interface InventoryItem {
   locationId: string;
   category: string;
   name: string;
+  brand?: string | null;
   photoDataUrl?: string;
 }
 

@@ -7,7 +7,8 @@ public class ReceiptImportDtos {
 
     public record ReceiptItemCandidate(
             String name,
-            String category
+            String category,
+            String brand
     ) {
     }
 }
