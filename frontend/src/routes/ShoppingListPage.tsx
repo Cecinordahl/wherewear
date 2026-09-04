@@ -199,6 +199,9 @@ export default function ShoppingListPage() {
 
   return (
     <div>
+      <div className="kicker">Å kjøpe</div>
+      <h2>Handleliste</h2>
+
       {error && <div className="error-banner">{error}</div>}
 
       {dueSoonItems.length > 0 && (

@@ -20,13 +20,6 @@ export default function LocationsPage() {
 
   useEffect(load, []);
 
-  // Cream-ifies the shared app chrome (header/bottom nav) while this page is
-  // mounted, and reverts the instant you navigate away - see index.css.
-  useEffect(() => {
-    document.body.classList.add("editorial-body");
-    return () => document.body.classList.remove("editorial-body");
-  }, []);
-
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -54,7 +47,7 @@ export default function LocationsPage() {
   };
 
   return (
-    <div className="editorial-theme">
+    <div>
       <div className="kicker">Oversikt</div>
       <h2>Steder</h2>
 
@@ -84,8 +77,8 @@ export default function LocationsPage() {
           {locations.map((location) => (
             <li key={location.id} className="checklist-item">
               <Link to={`/locations/${location.id}`} className="card-link" style={{ flex: 1 }}>
-                <p className="location-name">{location.name}</p>
-                <p className="location-type">{LOCATION_TYPE_LABELS[location.type]}</p>
+                <p className="list-name">{location.name}</p>
+                <p className="list-type">{LOCATION_TYPE_LABELS[location.type]}</p>
               </Link>
               <button className="icon-btn" onClick={() => void handleDelete(location.id)} aria-label="Slett">
                 ✕

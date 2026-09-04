@@ -29,6 +29,11 @@ export default function PackingListsPage() {
 
   return (
     <div className="stack">
+      <div>
+        <div className="kicker">Planlegging</div>
+        <h2>Pakkelister</h2>
+      </div>
+
       {locations.map((location) => (
         <div key={location.id} className="card">
           <p className="card-title">{location.name}</p>

@@ -23,6 +23,9 @@ export default function SearchPage() {
 
   return (
     <div>
+      <div className="kicker">Finn fram</div>
+      <h2>Søk</h2>
+
       <input
         type="text"
         placeholder="Hvor er skistavene mine?"

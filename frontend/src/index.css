@@ -1,26 +1,20 @@
+/* Warm editorial palette: cream ground, espresso ink, quiet olive accent.
+   Deliberately light-only - the design depends on the cream/espresso
+   contrast, and an auto-inverted dark variant fights it rather than
+   translating, so we opt out of dark mode instead of half-supporting it. */
 :root {
-  color-scheme: light dark;
-  --bg: #faf9f7;
+  color-scheme: light;
+  --bg: #f1ebe0;
   --surface: #ffffff;
-  --text: #1c1b1a;
-  --text-muted: #6b6b6b;
-  --border: #e4e2df;
-  --accent: #2f6f4f;
-  --accent-contrast: #ffffff;
-  --danger: #b3413d;
+  --text: #2b2117;
+  --text-muted: #8a7c6a;
+  --border: rgba(43, 33, 23, 0.16);
+  --accent: #4f5c3d;
+  --accent-contrast: #f1ebe0;
+  --espresso: #3a2b1e;
+  --danger: #a5442f;
+  --serif: "Cormorant Garamond", ui-serif, Georgia, serif;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #15171a;
-    --surface: #1e2124;
-    --text: #f0efec;
-    --text-muted: #9a9a9a;
-    --border: #313539;
-    --accent: #58b98a;
-    --accent-contrast: #0b1210;
-  }
 }
 
 * {
@@ -37,6 +31,34 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 2.3rem;
+  margin: 0 0 1.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Small tracked-out uppercase label sitting above a serif heading. */
+.kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.3rem;
 }
 
 .app-shell {
@@ -56,7 +78,10 @@ body {
 }
 
 .app-header h1 {
-  font-size: 1.15rem;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
   margin: 0;
 }
 
@@ -71,37 +96,43 @@ body {
   bottom: 0;
   display: flex;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--bg);
 }
 
 .app-nav a {
   flex: 1;
   text-align: center;
   padding: 0.75rem 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   text-decoration: none;
   color: var(--text-muted);
 }
 
 .app-nav a.active {
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--espresso);
 }
 
 .btn {
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-size: 0.95rem;
+  border: 1px solid var(--espresso);
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  background: var(--accent);
+  background: var(--espresso);
   color: var(--accent-contrast);
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.85;
 }
 
 .btn.secondary {
   background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--espresso);
+  border: 1px solid var(--espresso);
 }
 
 .btn.danger {
@@ -116,9 +147,11 @@ body {
 }
 
 input[type="text"],
-select {
+input[type="date"],
+select,
+textarea {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0.6rem 0.7rem;
   font-size: 0.95rem;
   background: var(--surface);
@@ -126,10 +159,18 @@ select {
   width: 100%;
 }
 
+input[type="text"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  outline: 1px solid var(--espresso);
+  outline-offset: 1px;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 1rem;
   margin-bottom: 0.75rem;
 }
@@ -141,7 +182,9 @@ select {
 }
 
 .card-title {
-  font-weight: 600;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.25rem;
   margin: 0 0 0.15rem;
 }
 
@@ -174,11 +217,11 @@ select {
 }
 
 .category-title {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.18em;
   color: var(--text-muted);
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
 }
 
 .checklist {
@@ -187,7 +230,7 @@ select {
   margin: 0;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -195,7 +238,7 @@ select {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.65rem 0.8rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -246,145 +289,20 @@ select {
   font-size: 0.9rem;
 }
 
-/* Scoped "editorial" theme (cream / olive / espresso, serif headings) -
-   applied only within pages wrapped in .editorial-theme, so it doesn't
-   change the look of the rest of the app while it's being tried out. */
-/* Cream-ifies the shared app chrome (header, bottom nav) too, while an
-   .editorial-theme page is mounted - toggled via a body class from the page
-   itself, so it reverts the instant you navigate elsewhere. Without this,
-   the cream panel sits inside the app's normal dark shell, which reads as
-   a broken/mismatched black-outside, beige-inside page. */
-body.editorial-body {
-  background: #f1ebe0;
-}
-body.editorial-body .app-header,
-body.editorial-body .app-nav {
-  background: #f1ebe0;
-  border-color: rgba(43, 33, 23, 0.16);
-}
-body.editorial-body .app-header h1 {
-  color: #2b2117;
-}
-body.editorial-body .app-header .icon-btn {
-  color: #8a7c6a;
-}
-body.editorial-body .app-nav a {
-  color: #8a7c6a;
-}
-body.editorial-body .app-nav a.active {
-  color: #2b2117;
-}
-
-.editorial-theme {
-  --e-bg: #f1ebe0;
-  --e-surface: #ffffff;
-  --e-text: #2b2117;
-  --e-muted: #8a7c6a;
-  --e-border: rgba(43, 33, 23, 0.16);
-  --e-espresso: #3a2b1e;
-  --e-espresso-fg: #f1ebe0;
-  --e-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
-
-  background: var(--e-bg);
-  color: var(--e-text);
-  margin: -1rem -1.25rem -5rem;
-  padding: 1.5rem 1.25rem 5rem;
-  min-height: 100%;
-}
-
-.editorial-theme .kicker {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--e-muted);
-  margin: 0 0 0.3rem;
-}
-
-.editorial-theme h2 {
-  font-family: var(--e-serif);
-  font-weight: 400;
-  font-size: 2.3rem;
-  letter-spacing: -0.01em;
-  margin: 0 0 1.25rem;
-}
-
-.editorial-theme .card {
-  background: var(--e-surface);
-  border: 1px solid var(--e-border);
-  border-radius: 4px;
-}
-
-.editorial-theme input[type="text"],
-.editorial-theme select {
-  border: 1px solid var(--e-border);
-  border-radius: 4px;
-  background: var(--e-surface);
-  color: var(--e-text);
-}
-
-.editorial-theme input[type="text"]:focus,
-.editorial-theme select:focus {
-  outline: 1px solid var(--e-espresso);
-  outline-offset: 1px;
-}
-
-.editorial-theme .btn {
-  border-radius: 999px;
-  background: var(--e-espresso);
-  color: var(--e-espresso-fg);
-  border: 1px solid var(--e-espresso);
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-}
-
-.editorial-theme .btn.secondary {
-  background: transparent;
-  color: var(--e-espresso);
-  border: 1px solid var(--e-espresso);
-}
-
-.editorial-theme .btn:hover {
-  opacity: 0.85;
-}
-
-.editorial-theme .empty-state {
-  color: var(--e-muted);
-}
-
-/* Plain, undivided list of locations - a single quiet panel rather than a
-   stacked card per row, matching a clean editorial services-list layout. */
-.editorial-theme .checklist {
-  background: var(--e-surface);
-  border: 1px solid var(--e-border);
-  border-radius: 4px;
-}
-
-.editorial-theme .checklist-item {
-  border-bottom-color: var(--e-border);
-  padding: 1rem 1.1rem;
-}
-
-.editorial-theme .location-name {
-  font-family: var(--e-serif);
+/* Name + type rows in a plain list (e.g. the locations list). */
+.list-name {
+  font-family: var(--serif);
   font-weight: 500;
   font-size: 1.25rem;
   margin: 0;
 }
 
-.editorial-theme .location-type {
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+.list-type {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--e-muted);
+  color: var(--text-muted);
   margin: 0.15rem 0 0;
-}
-
-.editorial-theme .checklist-item .icon-btn {
-  color: var(--e-muted);
-}
-
-.editorial-theme .checklist-item .icon-btn:hover {
-  color: var(--e-espresso);
 }
 
 .centered {

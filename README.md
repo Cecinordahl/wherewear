@@ -60,7 +60,7 @@ To just compile without running: `mvn -DskipTests package`. To run the unit test
    npm install
    npm run dev
    ```
-3. Open the printed local URL (usually `http://localhost:5173`). Sign in with Google — this creates your `users/{uid}` document and seeds your starter category templates automatically on first sign-in.
+3. Open the printed local URL (usually `http://localhost:5174`). Sign in with Google — this creates your `users/{uid}` document and seeds your starter category templates automatically on first sign-in.
 
 ---
 

@@ -14,7 +14,7 @@ wherewear:
     service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:}
     service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
   cors:
-    allowed-origins: ${WHEREWEAR_ALLOWED_ORIGINS:http://localhost:5173,https://wherewear.vercel.app}
+    allowed-origins: ${WHEREWEAR_ALLOWED_ORIGINS:http://localhost:5174,https://wherewear.vercel.app}
   serpapi:
     # Free-tier key from serpapi.com (100 searches/month). See README "Product photo lookup" section.
     api-key: ${SERPAPI_API_KEY:}
