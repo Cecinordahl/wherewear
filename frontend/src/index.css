@@ -246,6 +246,147 @@ select {
   font-size: 0.9rem;
 }
 
+/* Scoped "editorial" theme (cream / olive / espresso, serif headings) -
+   applied only within pages wrapped in .editorial-theme, so it doesn't
+   change the look of the rest of the app while it's being tried out. */
+/* Cream-ifies the shared app chrome (header, bottom nav) too, while an
+   .editorial-theme page is mounted - toggled via a body class from the page
+   itself, so it reverts the instant you navigate elsewhere. Without this,
+   the cream panel sits inside the app's normal dark shell, which reads as
+   a broken/mismatched black-outside, beige-inside page. */
+body.editorial-body {
+  background: #f1ebe0;
+}
+body.editorial-body .app-header,
+body.editorial-body .app-nav {
+  background: #f1ebe0;
+  border-color: rgba(43, 33, 23, 0.16);
+}
+body.editorial-body .app-header h1 {
+  color: #2b2117;
+}
+body.editorial-body .app-header .icon-btn {
+  color: #8a7c6a;
+}
+body.editorial-body .app-nav a {
+  color: #8a7c6a;
+}
+body.editorial-body .app-nav a.active {
+  color: #2b2117;
+}
+
+.editorial-theme {
+  --e-bg: #f1ebe0;
+  --e-surface: #ffffff;
+  --e-text: #2b2117;
+  --e-muted: #8a7c6a;
+  --e-border: rgba(43, 33, 23, 0.16);
+  --e-espresso: #3a2b1e;
+  --e-espresso-fg: #f1ebe0;
+  --e-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+
+  background: var(--e-bg);
+  color: var(--e-text);
+  margin: -1rem -1.25rem -5rem;
+  padding: 1.5rem 1.25rem 5rem;
+  min-height: 100%;
+}
+
+.editorial-theme .kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--e-muted);
+  margin: 0 0 0.3rem;
+}
+
+.editorial-theme h2 {
+  font-family: var(--e-serif);
+  font-weight: 400;
+  font-size: 2.3rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.25rem;
+}
+
+.editorial-theme .card {
+  background: var(--e-surface);
+  border: 1px solid var(--e-border);
+  border-radius: 4px;
+}
+
+.editorial-theme input[type="text"],
+.editorial-theme select {
+  border: 1px solid var(--e-border);
+  border-radius: 4px;
+  background: var(--e-surface);
+  color: var(--e-text);
+}
+
+.editorial-theme input[type="text"]:focus,
+.editorial-theme select:focus {
+  outline: 1px solid var(--e-espresso);
+  outline-offset: 1px;
+}
+
+.editorial-theme .btn {
+  border-radius: 999px;
+  background: var(--e-espresso);
+  color: var(--e-espresso-fg);
+  border: 1px solid var(--e-espresso);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.editorial-theme .btn.secondary {
+  background: transparent;
+  color: var(--e-espresso);
+  border: 1px solid var(--e-espresso);
+}
+
+.editorial-theme .btn:hover {
+  opacity: 0.85;
+}
+
+.editorial-theme .empty-state {
+  color: var(--e-muted);
+}
+
+/* Plain, undivided list of locations - a single quiet panel rather than a
+   stacked card per row, matching a clean editorial services-list layout. */
+.editorial-theme .checklist {
+  background: var(--e-surface);
+  border: 1px solid var(--e-border);
+  border-radius: 4px;
+}
+
+.editorial-theme .checklist-item {
+  border-bottom-color: var(--e-border);
+  padding: 1rem 1.1rem;
+}
+
+.editorial-theme .location-name {
+  font-family: var(--e-serif);
+  font-weight: 500;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.editorial-theme .location-type {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--e-muted);
+  margin: 0.15rem 0 0;
+}
+
+.editorial-theme .checklist-item .icon-btn {
+  color: var(--e-muted);
+}
+
+.editorial-theme .checklist-item .icon-btn:hover {
+  color: var(--e-espresso);
+}
+
 .centered {
   display: flex;
   align-items: center;

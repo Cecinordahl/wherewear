@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { locationsApi } from "../api/endpoints";
-import EmojiPicker from "../components/EmojiPicker";
 import type { Location, LocationType } from "../types";
 import { LOCATION_TYPE_LABELS } from "../types";
 
@@ -10,11 +9,7 @@ export default function LocationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [type, setType] = useState<LocationType>("FLIGHT");
-  const [icon, setIcon] = useState("");
   const [saving, setSaving] = useState(false);
-  const [editingIconId, setEditingIconId] = useState<string | null>(null);
-  const [iconDraft, setIconDraft] = useState("");
-  const [savingIcon, setSavingIcon] = useState(false);
 
   const load = () => {
     locationsApi
@@ -25,39 +20,26 @@ export default function LocationsPage() {
 
   useEffect(load, []);
 
+  // Cream-ifies the shared app chrome (header/bottom nav) while this page is
+  // mounted, and reverts the instant you navigate away - see index.css.
+  useEffect(() => {
+    document.body.classList.add("editorial-body");
+    return () => document.body.classList.remove("editorial-body");
+  }, []);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
     setError(null);
     try {
-      await locationsApi.create(name.trim(), type, icon.trim() || null);
+      await locationsApi.create(name.trim(), type);
       setName("");
-      setIcon("");
       load();
     } catch {
       setError("Klarte ikke å opprette stedet.");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const startEditIcon = (location: Location) => {
-    setEditingIconId(location.id);
-    setIconDraft(location.icon ?? "");
-  };
-
-  const handleSaveIcon = async (location: Location) => {
-    setSavingIcon(true);
-    setError(null);
-    try {
-      await locationsApi.update(location.id, location.name, location.type, iconDraft.trim() || null);
-      setEditingIconId(null);
-      load();
-    } catch {
-      setError("Klarte ikke å lagre emojien.");
-    } finally {
-      setSavingIcon(false);
     }
   };
 
@@ -72,7 +54,10 @@ export default function LocationsPage() {
   };
 
   return (
-    <div>
+    <div className="editorial-theme">
+      <div className="kicker">Oversikt</div>
+      <h2>Steder</h2>
+
       {error && <div className="error-banner">{error}</div>}
 
       <form className="stack card" onSubmit={(e) => void handleCreate(e)}>
@@ -86,12 +71,6 @@ export default function LocationsPage() {
           <option value="FLIGHT">{LOCATION_TYPE_LABELS.FLIGHT}</option>
           <option value="CABIN">{LOCATION_TYPE_LABELS.CABIN}</option>
         </select>
-        <div>
-          <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
-            Emoji (valgfritt) - brukes bl.a. som ikon på handlelisten
-          </label>
-          <EmojiPicker value={icon} onChange={setIcon} />
-        </div>
         <button className="btn" type="submit" disabled={saving || !name.trim()}>
           Legg til sted
         </button>
@@ -100,43 +79,21 @@ export default function LocationsPage() {
       {locations === null && <p className="empty-state">Laster …</p>}
       {locations?.length === 0 && <p className="empty-state">Ingen steder ennå.</p>}
 
-      {locations?.map((location) => (
-        <div key={location.id} className="card stack">
-          <div className="row-between">
-            <Link to={`/locations/${location.id}`} className="card-link">
-              <p className="card-title">
-                {location.icon ?? "🎯"} {location.name}
-              </p>
-              <p className="card-subtitle">{LOCATION_TYPE_LABELS[location.type]}</p>
-            </Link>
-            <div className="row">
-              <button className="icon-btn" onClick={() => startEditIcon(location)} aria-label="Endre emoji">
-                ✎
-              </button>
+      {locations && locations.length > 0 && (
+        <ul className="checklist">
+          {locations.map((location) => (
+            <li key={location.id} className="checklist-item">
+              <Link to={`/locations/${location.id}`} className="card-link" style={{ flex: 1 }}>
+                <p className="location-name">{location.name}</p>
+                <p className="location-type">{LOCATION_TYPE_LABELS[location.type]}</p>
+              </Link>
               <button className="icon-btn" onClick={() => void handleDelete(location.id)} aria-label="Slett">
                 ✕
               </button>
-            </div>
-          </div>
-
-          {editingIconId === location.id && (
-            <div className="row">
-              <EmojiPicker value={iconDraft} onChange={setIconDraft} />
-              <button
-                type="button"
-                className="btn secondary"
-                onClick={() => void handleSaveIcon(location)}
-                disabled={savingIcon}
-              >
-                Lagre
-              </button>
-              <button type="button" className="icon-btn" aria-label="Avbryt" onClick={() => setEditingIconId(null)}>
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
