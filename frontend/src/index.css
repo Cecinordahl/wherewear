@@ -154,9 +154,22 @@ textarea {
   border-radius: 4px;
   padding: 0.6rem 0.7rem;
   font-size: 0.95rem;
+  font-family: inherit;
   background: var(--surface);
   color: var(--text);
   width: 100%;
+}
+
+/* Replace the OS's native dropdown chrome (which otherwise clashes with the
+   styled text inputs) with a plain custom chevron, so both control types
+   read as one consistent design instead of two different ones. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238a7c6a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
 }
 
 input[type="text"]:focus,

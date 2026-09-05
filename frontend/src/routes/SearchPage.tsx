@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { searchApi } from "../api/endpoints";
 import type { SearchResult } from "../types";
 
@@ -6,18 +6,29 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Guards against out-of-order responses: typing fast fires a request per
+  // keystroke with no cancellation, so a broader earlier query (e.g. "sk",
+  // which matches nearly everything) can resolve after the narrower "sko"
+  // one and silently overwrite its correct results with stale, wider ones.
+  const latestQuery = useRef("");
 
   const runSearch = async (q: string) => {
     setQuery(q);
+    latestQuery.current = q;
     if (!q.trim()) {
       setResults(null);
       return;
     }
     setError(null);
     try {
-      setResults(await searchApi.search(q.trim()));
+      const found = await searchApi.search(q.trim());
+      if (latestQuery.current === q) {
+        setResults(found);
+      }
     } catch {
-      setError("Søket feilet.");
+      if (latestQuery.current === q) {
+        setError("Søket feilet.");
+      }
     }
   };
 
