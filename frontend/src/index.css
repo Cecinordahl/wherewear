@@ -237,6 +237,19 @@ textarea:focus {
   margin: 0 0 0.5rem;
 }
 
+.trip-note,
+.trip-note-input {
+  margin: 0 0 1.25rem;
+  font-style: italic;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+.trip-note {
+  border-left: 2px solid var(--espresso);
+  padding: 0.2rem 0 0.2rem 0.8rem;
+}
+
 .checklist {
   list-style: none;
   padding: 0;

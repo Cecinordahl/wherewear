@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class PackingListDtos {
             String locationId,
             String season,
             String tripDate,
+            String note,
             boolean past,
             List<PackingCategoryDto> categories
     ) {
@@ -50,6 +52,7 @@ public class PackingListDtos {
 
     public record SavePackingTripRequest(
             @Pattern(regexp = ISO_DATE) String tripDate,
+            @Size(max = 2000) String note,
             @NotNull @Valid List<PackingCategoryDto> categories
     ) {
     }

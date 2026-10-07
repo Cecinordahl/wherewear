@@ -26,6 +26,9 @@ public class PackingTrip {
     // Null means "no date yet" - such trips never become historic.
     private String tripDate;
 
+    // Free-text reminder shown above the list, e.g. "Vanne blomster før avreise".
+    private String note;
+
     private List<PackingCategory> categories = new ArrayList<>();
 
     @ServerTimestamp
@@ -75,6 +78,14 @@ public class PackingTrip {
 
     public void setTripDate(String tripDate) {
         this.tripDate = tripDate;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public List<PackingCategory> getCategories() {

@@ -72,8 +72,12 @@ export const packingListsApi = {
     api.get<PackingTrips>(`/api/packing-lists/${locationId}/${season}/trips`),
   createTrip: (locationId: string, season: Season, tripDate: string | null) =>
     api.post<PackingTrip>(`/api/packing-lists/${locationId}/${season}/trips`, { tripDate }),
-  saveTrip: (tripId: string, tripDate: string | null, categories: PackingTrip["categories"]) =>
-    api.put<PackingTrip>(`/api/packing-lists/trips/${tripId}`, { tripDate, categories }),
+  saveTrip: (trip: Pick<PackingTrip, "id" | "tripDate" | "note" | "categories">) =>
+    api.put<PackingTrip>(`/api/packing-lists/trips/${trip.id}`, {
+      tripDate: trip.tripDate,
+      note: trip.note,
+      categories: trip.categories,
+    }),
   resetTrip: (tripId: string) => api.post<PackingTrip>(`/api/packing-lists/trips/${tripId}/reset`),
   deleteTrip: (tripId: string) => api.delete<void>(`/api/packing-lists/trips/${tripId}`),
 };

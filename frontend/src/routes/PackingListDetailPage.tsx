@@ -79,7 +79,7 @@ export default function PackingListDetailPage() {
   const persist = async (updated: PackingTrip) => {
     replaceTrip(updated);
     try {
-      await packingListsApi.saveTrip(updated.id, updated.tripDate, updated.categories);
+      await packingListsApi.saveTrip(updated);
     } catch {
       setError("Klarte ikke å lagre endringen.");
     }
@@ -263,6 +263,23 @@ export default function PackingListDetailPage() {
               </button>
             </div>
           </div>
+
+          {readOnly ? (
+            trip.note && <p className="trip-note">{trip.note}</p>
+          ) : (
+            <textarea
+              // Uncontrolled + keyed by trip so switching lists shows that list's note.
+              key={trip.id}
+              className="trip-note-input"
+              rows={2}
+              placeholder="Notat, f.eks. «Vanne blomster før avreise»"
+              defaultValue={trip.note ?? ""}
+              onBlur={(e) => {
+                const note = e.target.value.trim() || null;
+                if (note !== trip.note) void persist({ ...trip, note });
+              }}
+            />
+          )}
 
           {trip.categories.map((c) => (
             <div key={c.category} className="category-section">

@@ -84,6 +84,7 @@ public class PackingListService {
     public PackingTripResponse saveTrip(String userId, String tripId, SavePackingTripRequest request) {
         PackingTrip trip = requireOwnedTrip(userId, tripId);
         trip.setTripDate(request.tripDate());
+        trip.setNote(request.note() == null || request.note().isBlank() ? null : request.note().trim());
         trip.setCategories(request.categories().stream()
                 .map(PackingListService::fromDto)
                 .toList());
@@ -269,6 +270,7 @@ public class PackingListService {
                 trip.getLocationId(),
                 trip.getSeason().name(),
                 trip.getTripDate(),
+                trip.getNote(),
                 isPast(trip, today),
                 categories
         );

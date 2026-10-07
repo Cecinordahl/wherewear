@@ -66,6 +66,7 @@ export interface PackingTrip {
   season: Season;
   // ISO yyyy-MM-dd; null = no date set yet (never becomes historic)
   tripDate: string | null;
+  note: string | null;
   past: boolean;
   categories: PackingCategory[];
 }
