@@ -40,6 +40,11 @@ service cloud.firestore {
       allow create: if isOwner(request.resource.data);
     }
 
+    match /packingTrips/{tripId} {
+      allow read, update, delete: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data);
+    }
+
     match /shoppingListItems/{itemId} {
       allow read, update, delete: if isOwner(resource.data);
       allow create: if isOwner(request.resource.data);

@@ -5,7 +5,8 @@ import type {
   InventoryItem,
   Location,
   LocationType,
-  PackingListData,
+  PackingTrip,
+  PackingTrips,
   ProductCandidate,
   Season,
   SearchResult,
@@ -67,12 +68,14 @@ export const categoryTemplatesApi = {
 };
 
 export const packingListsApi = {
-  get: (locationId: string, season: Season) =>
-    api.get<PackingListData>(`/api/packing-lists/${locationId}/${season}`),
-  save: (locationId: string, season: Season, categories: PackingListData["categories"]) =>
-    api.put<PackingListData>(`/api/packing-lists/${locationId}/${season}`, { categories }),
-  reset: (locationId: string, season: Season) =>
-    api.post<PackingListData>(`/api/packing-lists/${locationId}/${season}/reset`),
+  listTrips: (locationId: string, season: Season) =>
+    api.get<PackingTrips>(`/api/packing-lists/${locationId}/${season}/trips`),
+  createTrip: (locationId: string, season: Season, tripDate: string | null) =>
+    api.post<PackingTrip>(`/api/packing-lists/${locationId}/${season}/trips`, { tripDate }),
+  saveTrip: (tripId: string, tripDate: string | null, categories: PackingTrip["categories"]) =>
+    api.put<PackingTrip>(`/api/packing-lists/trips/${tripId}`, { tripDate, categories }),
+  resetTrip: (tripId: string) => api.post<PackingTrip>(`/api/packing-lists/trips/${tripId}/reset`),
+  deleteTrip: (tripId: string) => api.delete<void>(`/api/packing-lists/trips/${tripId}`),
 };
 
 export const searchApi = {

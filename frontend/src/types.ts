@@ -60,10 +60,19 @@ export interface PackingCategory {
   items: PackingItem[];
 }
 
-export interface PackingListData {
+export interface PackingTrip {
+  id: string;
   locationId: string;
   season: Season;
+  // ISO yyyy-MM-dd; null = no date set yet (never becomes historic)
+  tripDate: string | null;
+  past: boolean;
   categories: PackingCategory[];
+}
+
+export interface PackingTrips {
+  active: PackingTrip[];
+  past: PackingTrip[];
 }
 
 export interface SearchResult {

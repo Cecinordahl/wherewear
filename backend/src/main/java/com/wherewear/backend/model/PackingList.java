@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The default list for a location+season: the union of every category and
+ * item ever added to a trip there (see PackingTrip), so new trips start
+ * complete and only need trimming. Item checked state here is unused.
+ */
 public class PackingList {
 
     // Deterministic: {userId}_{locationId}_{season}
