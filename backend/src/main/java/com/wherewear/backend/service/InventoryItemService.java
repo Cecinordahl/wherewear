@@ -68,6 +68,13 @@ public class InventoryItemService {
         return toResponse(inventoryItemRepository.save(existing));
     }
 
+    public InventoryItemResponse setPhotoData(String userId, String itemId, String photoDataUrl) {
+        InventoryItem existing = requireOwned(userId, itemId);
+        existing.setPhotoDataUrl(validatePhotoDataUrl(photoDataUrl));
+        existing.setUpdatedAt(null);
+        return toResponse(inventoryItemRepository.save(existing));
+    }
+
     private InventoryItem requireOwned(String userId, String itemId) {
         InventoryItem item = inventoryItemRepository.findById(itemId);
         if (item == null) {

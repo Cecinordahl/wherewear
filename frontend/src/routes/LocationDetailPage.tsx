@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { categoriesApi, itemsApi, locationsApi } from "../api/endpoints";
 import EmojiPicker from "../components/EmojiPicker";
 import type { InventoryItem, Location } from "../types";
+import { compressPhoto } from "../utils/image";
 
 export default function LocationDetailPage() {
   const { locationId } = useParams<{ locationId: string }>();
@@ -15,6 +16,10 @@ export default function LocationDetailPage() {
   const [newItemName, setNewItemName] = useState("");
   const [newItemBrand, setNewItemBrand] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
+  const [newItemPhoto, setNewItemPhoto] = useState<string | null>(null);
+  const [photoChanged, setPhotoChanged] = useState(false);
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -58,8 +63,11 @@ export default function LocationDetailPage() {
     try {
       if (editingItemId) {
         await itemsApi.update(editingItemId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
+        if (photoChanged) {
+          await itemsApi.setPhotoData(editingItemId, newItemPhoto);
+        }
       } else {
-        await itemsApi.create(locationId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null);
+        await itemsApi.create(locationId, newItemCategory, newItemName.trim(), newItemBrand.trim() || null, newItemPhoto);
       }
       cancelEditItem();
       loadItems();
@@ -75,6 +83,8 @@ export default function LocationDetailPage() {
     setNewItemName(item.name);
     setNewItemBrand(item.brand ?? "");
     setNewItemCategory(item.category);
+    setNewItemPhoto(item.photoDataUrl ?? null);
+    setPhotoChanged(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -82,6 +92,29 @@ export default function LocationDetailPage() {
     setEditingItemId(null);
     setNewItemName("");
     setNewItemBrand("");
+    setNewItemPhoto(null);
+    setPhotoChanged(false);
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPreparingPhoto(true);
+    setError(null);
+    try {
+      setNewItemPhoto((await compressPhoto(file)).dataUrl);
+      setPhotoChanged(true);
+    } catch {
+      setError("Klarte ikke å lese bildet (prøv JPEG eller PNG).");
+    } finally {
+      setPreparingPhoto(false);
+    }
+  };
+
+  const removePhoto = () => {
+    setNewItemPhoto(null);
+    setPhotoChanged(true);
   };
 
   const handleSaveNewCategory = async () => {
@@ -171,12 +204,52 @@ export default function LocationDetailPage() {
       {error && <div className="error-banner">{error}</div>}
 
       <form className="stack card" onSubmit={(e) => void handleAddItem(e)}>
-        <input
-          type="text"
-          placeholder="Ny ting, f.eks. Blå ullgenser"
-          value={newItemName}
-          onChange={(e) => setNewItemName(e.target.value)}
-        />
+        <div className="row">
+          <input
+            type="text"
+            placeholder="Ny ting, f.eks. Blå ullgenser"
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          {newItemPhoto ? (
+            <>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Bytt bilde"
+                title="Bytt bilde"
+                onClick={() => photoInputRef.current?.click()}
+                style={{ padding: 0 }}
+              >
+                <img
+                  src={newItemPhoto}
+                  alt=""
+                  style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", display: "block" }}
+                />
+              </button>
+              <button type="button" className="icon-btn" aria-label="Fjern bilde" onClick={removePhoto}>
+                ✕
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={preparingPhoto}
+            >
+              {preparingPhoto ? "…" : "+ Bilde"}
+            </button>
+          )}
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => void handlePhotoChange(e)}
+          />
+        </div>
         <input
           type="text"
           placeholder="Merke (valgfritt)"
@@ -233,7 +306,7 @@ export default function LocationDetailPage() {
         )}
 
         <div className="row">
-          <button className="btn" type="submit" disabled={saving || !newItemName.trim() || addingCategory}>
+          <button className="btn" type="submit" disabled={saving || preparingPhoto || !newItemName.trim() || addingCategory}>
             {editingItemId ? "Lagre endringer" : "Legg til"}
           </button>
           {editingItemId && (
@@ -273,8 +346,8 @@ export default function LocationDetailPage() {
                       <Link
                         to={`/locations/${locationId}/items/${item.id}/find-photo`}
                         className="icon-btn"
-                        aria-label="Finn produktbilde"
-                        title="Finn produktbilde"
+                        aria-label="Legg til bilde"
+                        title="Legg til bilde"
                       >
                         📷
                       </Link>

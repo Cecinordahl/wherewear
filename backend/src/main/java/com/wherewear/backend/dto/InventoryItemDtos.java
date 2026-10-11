@@ -30,6 +30,12 @@ public class InventoryItemDtos {
     ) {
     }
 
+    // The user's own photo, resized in the browser. null clears the photo.
+    public record SetPhotoDataRequest(
+            String photoDataUrl
+    ) {
+    }
+
     public record InventoryItemResponse(
             String id,
             String locationId,

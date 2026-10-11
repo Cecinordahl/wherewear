@@ -3,6 +3,7 @@ package com.wherewear.backend.controller;
 import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemRequest;
 import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemResponse;
 import com.wherewear.backend.dto.InventoryItemDtos.InventoryItemUpdateRequest;
+import com.wherewear.backend.dto.InventoryItemDtos.SetPhotoDataRequest;
 import com.wherewear.backend.dto.InventoryItemDtos.SetPhotoRequest;
 import com.wherewear.backend.security.RequestUserContext;
 import com.wherewear.backend.service.InventoryItemService;
@@ -44,5 +45,10 @@ public class InventoryItemController {
     @PutMapping("/items/{id}/photo")
     public InventoryItemResponse setPhoto(@PathVariable String id, @Valid @RequestBody SetPhotoRequest request) {
         return inventoryItemService.setPhoto(RequestUserContext.requireUserId(), id, request.sourceImageUrl());
+    }
+
+    @PutMapping("/items/{id}/photo-data")
+    public InventoryItemResponse setPhotoData(@PathVariable String id, @RequestBody SetPhotoDataRequest request) {
+        return inventoryItemService.setPhotoData(RequestUserContext.requireUserId(), id, request.photoDataUrl());
     }
 }
