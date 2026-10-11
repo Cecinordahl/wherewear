@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { itemsApi, productLookupApi } from "../api/endpoints";
 import type { ProductCandidate } from "../types";
+import { compressPhoto } from "../utils/image";
 
 const DEBOUNCE_MS = 500;
 
@@ -25,6 +26,7 @@ export default function FindPhotoPage() {
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ownPhotoInputRef = useRef<HTMLInputElement>(null);
 
   const runSearch = async (searcher: () => Promise<ProductCandidate[]>) => {
     setLoading(true);
@@ -61,6 +63,22 @@ export default function FindPhotoPage() {
     void runSearch(() => productLookupApi.searchByPhoto(file));
   };
 
+  const handleOwnPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !itemId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const photo = await compressPhoto(file);
+      await itemsApi.setPhotoData(itemId, photo.dataUrl);
+      navigate(`/locations/${locationId}`);
+    } catch (err) {
+      setError(err instanceof ApiError ? describeError(err) : "Klarte ikke å lese bildet (prøv JPEG eller PNG).");
+      setSaving(false);
+    }
+  };
+
   const handlePick = async (candidate: PhotoCandidate) => {
     if (!itemId) return;
     setSaving(true);
@@ -79,10 +97,27 @@ export default function FindPhotoPage() {
       <Link to={`/locations/${locationId}`} className="card-subtitle">
         ← Tilbake
       </Link>
-      <h2 style={{ marginTop: "0.4rem" }}>Finn produktbilde</h2>
+      <h2 style={{ marginTop: "0.4rem" }}>Legg til bilde</h2>
 
       {error && <div className="error-banner">{error}</div>}
 
+      <div className="stack card">
+        <p className="card-subtitle">Ta bilde eller velg et du har.</p>
+        <button className="btn" onClick={() => ownPhotoInputRef.current?.click()} disabled={saving}>
+          Bruk eget bilde
+        </button>
+        <input
+          ref={ownPhotoInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => void handleOwnPhotoChange(e)}
+        />
+      </div>
+
+      <p className="card-subtitle" style={{ marginTop: "0.75rem" }}>
+        … eller finn produktbildet på nett:
+      </p>
       <div className="stack card">
         <input
           type="text"
@@ -93,7 +128,7 @@ export default function FindPhotoPage() {
         <div className="row-between">
           <span className="card-subtitle">eller</span>
           <button className="btn secondary" onClick={() => fileInputRef.current?.click()}>
-            Last opp bilde
+            Søk med bilde
           </button>
           <input
             ref={fileInputRef}

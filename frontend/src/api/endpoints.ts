@@ -38,6 +38,8 @@ export const itemsApi = {
   remove: (id: string) => api.delete<void>(`/api/items/${id}`),
   setPhoto: (id: string, sourceImageUrl: string) =>
     api.put<InventoryItem>(`/api/items/${id}/photo`, { sourceImageUrl }),
+  setPhotoData: (id: string, photoDataUrl: string | null) =>
+    api.put<InventoryItem>(`/api/items/${id}/photo-data`, { photoDataUrl }),
 };
 
 export const productLookupApi = {
