@@ -6,6 +6,7 @@ import LoginPage from "./routes/LoginPage";
 import LocationsPage from "./routes/LocationsPage";
 import LocationDetailPage from "./routes/LocationDetailPage";
 import FindPhotoPage from "./routes/FindPhotoPage";
+import PhotoImportPage from "./routes/PhotoImportPage";
 import ReceiptImportPage from "./routes/ReceiptImportPage";
 import PackingListsPage from "./routes/PackingListsPage";
 import PackingListDetailPage from "./routes/PackingListDetailPage";
@@ -44,6 +45,7 @@ function AppShell() {
             <Route path="/locations/:locationId" element={<LocationDetailPage />} />
             <Route path="/locations/:locationId/items/:itemId/find-photo" element={<FindPhotoPage />} />
             <Route path="/locations/:locationId/import-receipt" element={<ReceiptImportPage />} />
+            <Route path="/locations/:locationId/import-photos" element={<PhotoImportPage />} />
             <Route path="/packing-lists" element={<PackingListsPage />} />
             <Route path="/packing-lists/:locationId/:season" element={<PackingListDetailPage />} />
             <Route path="/search" element={<SearchPage />} />

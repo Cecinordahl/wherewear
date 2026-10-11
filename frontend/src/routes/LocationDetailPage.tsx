@@ -244,9 +244,14 @@ export default function LocationDetailPage() {
         </div>
       </form>
 
-      <Link to={`/locations/${locationId}/import-receipt`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block", marginBottom: "1rem" }}>
-        Importer fra kvittering
-      </Link>
+      <div className="row" style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
+        <Link to={`/locations/${locationId}/import-receipt`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block" }}>
+          Importer fra kvittering
+        </Link>
+        <Link to={`/locations/${locationId}/import-photos`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block" }}>
+          Importer fra bilder
+        </Link>
+      </div>
 
       {items === null && <p className="empty-state">Laster …</p>}
 

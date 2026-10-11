@@ -25,8 +25,14 @@ export const locationsApi = {
 export const itemsApi = {
   listForLocation: (locationId: string) =>
     api.get<InventoryItem[]>(`/api/locations/${locationId}/items`),
-  create: (locationId: string, category: string, name: string, brand?: string | null) =>
-    api.post<InventoryItem>("/api/items", { locationId, category, name, brand: brand ?? null }),
+  create: (locationId: string, category: string, name: string, brand?: string | null, photoDataUrl?: string | null) =>
+    api.post<InventoryItem>("/api/items", {
+      locationId,
+      category,
+      name,
+      brand: brand ?? null,
+      photoDataUrl: photoDataUrl ?? null,
+    }),
   update: (id: string, category: string, name: string, brand?: string | null) =>
     api.put<InventoryItem>(`/api/items/${id}`, { category, name, brand: brand ?? null }),
   remove: (id: string) => api.delete<void>(`/api/items/${id}`),
@@ -100,6 +106,20 @@ export const receiptImportApi = {
       `/api/receipt-import?locationType=${locationType}`,
       formData
     );
+  },
+};
+
+export interface PhotoItemCandidate {
+  name: string;
+  category: string;
+  brand: string | null;
+}
+
+export const photoImportApi = {
+  identify: (locationType: LocationType, photo: Blob) => {
+    const formData = new FormData();
+    formData.append("file", photo, "photo.jpg");
+    return api.postForm<PhotoItemCandidate>(`/api/photo-import?locationType=${locationType}`, formData);
   },
 };
 

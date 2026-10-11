@@ -139,6 +139,7 @@ Base URL: backend root. All `/api/**` routes require `Authorization: Bearer <Fir
 | POST | `/api/packing-lists/{locationId}/{season}/reset` | regenerate from templates + inventory |
 | GET | `/api/search?q=...` | search inventory by name |
 | POST | `/api/receipt-import?locationType=...` | extract candidate items from a receipt photo (multipart) |
+| POST | `/api/photo-import?locationType=...` | identify the single clothing item in a photo (multipart) |
 | GET/POST | `/api/shopping-list` | list / add shopping list items |
 | PUT/DELETE | `/api/shopping-list/{id}` | update / delete a shopping list item |
 | PUT | `/api/shopping-list/{id}/checked` | mark bought / not bought |
@@ -199,6 +200,12 @@ Lets you bulk-add inventory items from a photo of a receipt instead of typing ea
 
 **Notes:** extraction quality depends on photo clarity and receipt layout - expect to correct a name or category occasionally, same "best-effort, you confirm" spirit as the other AI-assisted features. The model id is configurable via `GEMINI_MODEL` (defaults to `gemini-flash-latest`, Google's rolling alias for the current recommended flash model) in case Google ever retires that alias too - it already retired two pinned model names in 2026 (`gemini-2.0-flash`, then `gemini-2.5-flash`), which is why this now uses the alias instead of a version-pinned id. If you ever see a "Gemini request failed: 404" error, that's this - check [ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models) for the current model list and set `GEMINI_MODEL` accordingly. Without a key configured, the feature shows a friendly "not set up yet" message — everything else in the app works fine regardless.
 
+### Photo import
+
+Same idea, but from photos of the clothes themselves - **one item per photo**. From a location's page, tap **"Importer fra bilder"** → pick as many photos as you like. Each photo is resized in the browser (900px, JPEG) and sent to `/api/photo-import`, which asks Gemini for a Norwegian name (colour + type), the best-fitting category and, if a logo is visible, the brand. Rows fill in one at a time on the same review screen as receipt import, and **the photo is saved as the item's picture** (inline `photoDataUrl`, same as product-photo lookup).
+
+Photos are identified **one at a time** to stay within Gemini's free-tier rate limit (roughly 10 per minute), with a longer wait-and-retry if it says it's overloaded - so 30 photos takes a few minutes. A photo that fails can be retried or filled in by hand. Uses the same `GEMINI_API_KEY` - no extra setup.
+
 ---
 
 ## GDPR / privacy notes
@@ -210,6 +217,7 @@ Lets you bulk-add inventory items from a photo of a receipt instead of typing ea
 - **Privacy notice**: not needed for solo use. **Before inviting friends**, add a short privacy notice (what's collected, why, that it's not shared between accounts, how to request deletion) — a simple static page is enough at this scale; you don't need a cookie banner since there's no tracking/analytics here.
 - **Data deletion**: there's currently no "delete my account and all my data" endpoint. Flag this as a **before-you-invite-others checklist item** — worth adding a `DELETE /api/me` that cascades through locations/items/templates/packingLists for that `userId`, since GDPR gives users a right to erasure once more than one person's data is involved.
 - **Data minimization**: the model stores what's needed (item names, categories, locations, and now optionally a product photo) — no location coordinates, no tracking.
+- **Third-party data flow (receipt/photo import)**: receipt and clothing photos are sent to Google's Gemini API for identification. Note that on Gemini's free tier Google may use submitted content to improve its products.
 - **Third-party data flow (product photo lookup)**: using the optional photo-search feature sends the photo to SerpAPI (and briefly, to the anonymous file host 0x0.st) — both outside Google's ecosystem. This is opt-in per item (only triggered when you tap 📷) and only relevant once this feature is in use; worth knowing if you ever write a privacy notice for other users.
 
 ---
