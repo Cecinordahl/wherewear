@@ -48,7 +48,7 @@ class GeminiClient {
     String generateJson(String prompt, byte[] imageBytes, String mimeType) {
         if (apiKey == null || apiKey.isBlank()) {
             throw new ResponseStatusException(SERVICE_UNAVAILABLE,
-                    "Receipt import isn't configured yet (missing GEMINI_API_KEY). See README.");
+                    "AI import isn't configured yet (missing GEMINI_API_KEY). See README.");
         }
 
         ObjectNode root = objectMapper.createObjectNode();

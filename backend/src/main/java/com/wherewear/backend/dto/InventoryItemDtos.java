@@ -11,7 +11,10 @@ public class InventoryItemDtos {
             @NotBlank String locationId,
             @NotBlank String category,
             @NotBlank String name,
-            String brand
+            String brand,
+            // Optional compressed "data:image/jpeg;base64,..." photo, sent by
+            // bulk photo import (the browser resizes the photo before upload).
+            String photoDataUrl
     ) {
     }
 
