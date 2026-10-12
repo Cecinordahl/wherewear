@@ -379,9 +379,14 @@ function describeError(err: unknown): string {
     if (err.status === 503) {
       return "Bildeimport er ikke satt opp ennå (mangler GEMINI_API_KEY).";
     }
+    if (err.status === 404) {
+      return "Serveren er ikke oppdatert med bildeimport ennå (404).";
+    }
     if (isRateLimited(err)) {
       return "Gemini er overbelastet akkurat nå.";
     }
+    // Show the server's reason, so failures can be diagnosed from the screen.
+    return `Klarte ikke å gjenkjenne plagget (${err.status}: ${err.message}).`;
   }
-  return "Klarte ikke å gjenkjenne plagget.";
+  return err instanceof Error ? `Klarte ikke å gjenkjenne plagget (${err.message}).` : "Klarte ikke å gjenkjenne plagget.";
 }
