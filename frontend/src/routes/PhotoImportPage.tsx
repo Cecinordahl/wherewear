@@ -242,13 +242,13 @@ export default function PhotoImportPage() {
               ? `Gjenkjenner plagg … (${rows.filter((r) => r.status === "done" || r.status === "failed").length}/${rows.length})`
               : `${rows.length} varer klare. Sjekk gjerne over før du legger til.`}
           </p>
-          <ul className="checklist">
+          <ul className="item-cards">
             {rows.map((row) => (
-              <li key={row.id} className="checklist-item" style={{ flexWrap: "wrap", alignItems: "flex-start" }}>
+              <li key={row.id} className="item-card" style={{ flexWrap: "wrap", alignItems: "flex-start" }}>
                 <img
                   src={row.photoDataUrl}
                   alt=""
-                  style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
+                  style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover", flexShrink: 0 }}
                 />
                 <div className="stack" style={{ flex: 1, minWidth: "50%" }}>
                   {row.status === "queued" || row.status === "identifying" ? (

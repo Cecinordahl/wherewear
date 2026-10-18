@@ -59,7 +59,7 @@ export default function StoreAutocomplete({
       />
       {showSuggestions && (matches.length > 0 || (query && !exactMatch)) && (
         <div
-          className="checklist"
+          className="dropdown-panel"
           style={{ position: "absolute", zIndex: 10, left: 0, right: 0, marginTop: "0.25rem" }}
         >
           {matches.map((s) => (

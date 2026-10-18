@@ -173,7 +173,7 @@ export default function LocationDetailPage() {
       <Link to="/locations" className="card-subtitle">
         ← Steder
       </Link>
-      <div className="row" style={{ marginTop: "0.4rem", alignItems: "center" }}>
+      <div className="row" style={{ margin: "0.75rem 0 1.75rem", alignItems: "center" }}>
         <h2 style={{ margin: 0 }}>
           {location.icon ?? "🎯"} {location.name}
         </h2>
@@ -203,7 +203,7 @@ export default function LocationDetailPage() {
 
       {error && <div className="error-banner">{error}</div>}
 
-      <form className="stack card" onSubmit={(e) => void handleAddItem(e)}>
+      <form className="stack card" style={{ padding: "1.5rem", marginBottom: "1.25rem" }} onSubmit={(e) => void handleAddItem(e)}>
         <div className="row">
           <input
             type="text"
@@ -225,7 +225,7 @@ export default function LocationDetailPage() {
                 <img
                   src={newItemPhoto}
                   alt=""
-                  style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", display: "block" }}
+                  style={{ width: 44, height: 44, borderRadius: 12, objectFit: "cover", display: "block" }}
                 />
               </button>
               <button type="button" className="icon-btn" aria-label="Fjern bilde" onClick={removePhoto}>
@@ -317,7 +317,7 @@ export default function LocationDetailPage() {
         </div>
       </form>
 
-      <div className="row" style={{ marginBottom: "1rem", flexWrap: "wrap" }}>
+      <div className="row" style={{ marginBottom: "2.25rem", flexWrap: "wrap", gap: "0.6rem" }}>
         <Link to={`/locations/${locationId}/import-receipt`} className="btn secondary" style={{ textDecoration: "none", display: "inline-block" }}>
           Importer fra kvittering
         </Link>
@@ -333,29 +333,25 @@ export default function LocationDetailPage() {
           categoryItems.length > 0 && (
             <div key={category} className="category-section">
               <p className="category-title">{category}</p>
-              <ul className="checklist">
+              <ul className="item-cards">
                 {categoryItems.map((item) => (
-                  <li key={item.id} className="checklist-item">
+                  <li key={item.id} className="item-card">
                     {item.photoDataUrl ? (
-                      <img
-                        src={item.photoDataUrl}
-                        alt=""
-                        style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }}
-                      />
+                      <img src={item.photoDataUrl} alt="" className="item-card-thumb" />
                     ) : (
                       <Link
                         to={`/locations/${locationId}/items/${item.id}/find-photo`}
-                        className="icon-btn"
+                        className="item-card-thumb item-card-thumb-empty"
                         aria-label="Legg til bilde"
                         title="Legg til bilde"
                       >
                         📷
                       </Link>
                     )}
-                    <label>
+                    <span className="item-card-name">
                       {item.name}
                       {item.brand && <span className="card-subtitle"> · {item.brand}</span>}
-                    </label>
+                    </span>
                     <button className="icon-btn" onClick={() => startEditItem(item)} aria-label="Rediger">
                       ✎
                     </button>

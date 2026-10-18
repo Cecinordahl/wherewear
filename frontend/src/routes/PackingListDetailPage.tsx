@@ -296,9 +296,9 @@ export default function PackingListDetailPage() {
                 )}
               </div>
               {c.items.length > 0 && (
-                <ul className="checklist">
+                <ul className="item-cards">
                   {c.items.map((item) => (
-                    <li key={item.name} className={`checklist-item ${item.checked ? "checked" : ""}`}>
+                    <li key={item.name} className={`item-card ${item.checked ? "checked" : ""}`}>
                       <input
                         type="checkbox"
                         checked={item.checked}

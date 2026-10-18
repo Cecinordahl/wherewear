@@ -419,9 +419,9 @@ export default function ShoppingListPage() {
       {checkedItems.length > 0 && (
         <div className="category-section" style={{ marginTop: "1rem" }}>
           <p className="category-title">Kjøpt</p>
-          <ul className="checklist">
+          <ul className="item-cards">
             {checkedItems.map((item) => (
-              <li key={item.id} className="checklist-item checked">
+              <li key={item.id} className="item-card checked">
                 <input type="checkbox" checked={item.checked} onChange={() => void toggleChecked(item)} />
                 <label style={{ display: "flex", flexDirection: "column" }}>
                   <span>{item.name}</span>
@@ -468,7 +468,7 @@ function ShoppingListSection({
   return (
     <div className="category-section">
       <p className="category-title">{title}</p>
-      <ul className="checklist">
+      <ul className="item-cards">
         {items.map((item) => {
           const link = item.productUrl || item.storeUrl;
           const subtitleParts: React.ReactNode[] = [];
@@ -481,7 +481,7 @@ function ShoppingListSection({
             );
           }
           return (
-            <li key={item.id} className="checklist-item">
+            <li key={item.id} className="item-card">
               <input type="checkbox" checked={item.checked} onChange={() => onToggle(item)} />
               <label style={{ display: "flex", flexDirection: "column" }}>
                 <span>{item.name}</span>

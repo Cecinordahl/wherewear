@@ -161,9 +161,9 @@ export default function ReceiptImportPage() {
       {rows !== null && rows.length > 0 && (
         <div className="stack">
           <p className="card-subtitle">{rows.length} varer funnet. Sjekk gjerne over før du legger til.</p>
-          <ul className="checklist">
+          <ul className="item-cards">
             {rows.map((row) => (
-              <li key={row.id} className="checklist-item" style={{ flexWrap: "wrap" }}>
+              <li key={row.id} className="item-card" style={{ flexWrap: "wrap" }}>
                 <div className="stack" style={{ flex: 1, minWidth: "60%" }}>
                   <input
                     type="text"

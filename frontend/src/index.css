@@ -1,19 +1,22 @@
-/* Warm editorial palette: cream ground, espresso ink, quiet olive accent.
-   Deliberately light-only - the design depends on the cream/espresso
-   contrast, and an auto-inverted dark variant fights it rather than
+/* Quiet editorial palette: off-white ground, soft charcoal ink, gray pills.
+   Deliberately light-only - the design depends on the soft off-white
+   surfaces, and an auto-inverted dark variant fights it rather than
    translating, so we opt out of dark mode instead of half-supporting it. */
 :root {
   color-scheme: light;
-  --bg: #f1ebe0;
+  --bg: #f6f5f2;
   --surface: #ffffff;
-  --text: #2b2117;
-  --text-muted: #8a7c6a;
-  --border: rgba(43, 33, 23, 0.16);
+  --text: #1f1f1e;
+  --text-muted: #8b8a86;
+  --border: rgba(31, 31, 30, 0.08);
   --accent: #4f5c3d;
-  --accent-contrast: #f1ebe0;
-  --espresso: #3a2b1e;
+  --accent-contrast: #f6f5f2;
+  --espresso: #2e2d2b;
+  --pill: #e9e8e5;
+  --pill-hover: #e0dfdb;
   --danger: #a5442f;
-  --serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --shadow-soft: 0 1px 2px rgba(31, 31, 30, 0.04), 0 6px 20px rgba(31, 31, 30, 0.05);
+  --serif: "Playfair Display", ui-serif, Georgia, serif;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -44,7 +47,8 @@ h4 {
 
 h2 {
   font-size: 2.3rem;
-  margin: 0 0 1.25rem;
+  line-height: 1.15;
+  margin: 0 0 1.5rem;
 }
 
 h3 {
@@ -73,7 +77,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -87,7 +91,7 @@ h3 {
 
 .app-main {
   flex: 1;
-  padding: 1rem 1.25rem 5rem;
+  padding: 1.5rem 1.5rem 5rem;
   overflow-y: auto;
 }
 
@@ -115,30 +119,38 @@ h3 {
 }
 
 .btn {
-  border: 1px solid var(--espresso);
+  border: none;
   border-radius: 999px;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9rem;
+  font-family: inherit;
   cursor: pointer;
-  background: var(--espresso);
-  color: var(--accent-contrast);
+  background: var(--pill);
+  color: var(--espresso);
+  transition: background-color 0.15s ease;
 }
 
 .btn:hover:not(:disabled) {
-  opacity: 0.85;
+  background: var(--pill-hover);
 }
 
 .btn.secondary {
-  background: transparent;
+  background: var(--surface);
   color: var(--espresso);
-  border: 1px solid var(--espresso);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn.secondary:hover:not(:disabled) {
+  background: var(--pill);
 }
 
 .btn.danger {
-  background: transparent;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
   color: var(--danger);
-  border: 1px solid var(--danger);
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
 }
 
 .btn:disabled {
@@ -151,8 +163,8 @@ input[type="date"],
 select,
 textarea {
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.6rem 0.7rem;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
   font-size: 0.95rem;
   font-family: inherit;
   background: var(--surface);
@@ -167,25 +179,29 @@ select {
   appearance: none;
   -webkit-appearance: none;
   padding-right: 2.2rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238a7c6a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238b8a86' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.8rem center;
+  background-position: right 1rem center;
 }
 
 input[type="text"]:focus,
 input[type="date"]:focus,
 select:focus,
 textarea:focus {
-  outline: 1px solid var(--espresso);
-  outline-offset: 1px;
+  outline: none;
+  border-color: rgba(31, 31, 30, 0.22);
+  box-shadow: 0 0 0 3px rgba(31, 31, 30, 0.05);
 }
 
+/* Transparent border (rather than none) so a page can still tint it,
+   e.g. the shopping list's warning card. */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
 }
 
 .card-link {
@@ -226,7 +242,7 @@ textarea:focus {
 }
 
 .category-section {
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .category-title {
@@ -234,7 +250,7 @@ textarea:focus {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--text-muted);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.85rem;
 }
 
 .trip-note,
@@ -250,39 +266,73 @@ textarea:focus {
   padding: 0.2rem 0 0.2rem 0.8rem;
 }
 
-.checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Floating suggestion panel under an input (e.g. store autocomplete). */
+.dropdown-panel {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft), 0 12px 32px rgba(31, 31, 30, 0.08);
   overflow: hidden;
 }
 
-.checklist-item {
+/* Item rows as separate soft cards - spacing and shadow instead of dividers. */
+.item-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.item-card {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--border);
+  gap: 0.9rem;
+  padding: 0.9rem 1rem 0.9rem 1.1rem;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
 }
 
-.checklist-item:last-child {
-  border-bottom: none;
+.item-card-name {
+  flex: 1;
+  min-width: 0;
 }
 
-.checklist-item label {
+.item-card-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Same footprint as a photo thumbnail, so names line up with or without one. */
+.item-card-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  text-decoration: none;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.item-card-thumb-empty:hover {
+  opacity: 1;
+}
+
+.item-card label {
   flex: 1;
   cursor: pointer;
 }
 
-.checklist-item.checked label {
+.item-card.checked label {
   color: var(--text-muted);
   text-decoration: line-through;
 }
 
-.checklist-item input[type="checkbox"] {
+.item-card input[type="checkbox"] {
   width: 1.15rem;
   height: 1.15rem;
 }

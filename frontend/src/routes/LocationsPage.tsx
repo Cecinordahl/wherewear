@@ -73,9 +73,9 @@ export default function LocationsPage() {
       {locations?.length === 0 && <p className="empty-state">Ingen steder ennå.</p>}
 
       {locations && locations.length > 0 && (
-        <ul className="checklist">
+        <ul className="item-cards">
           {locations.map((location) => (
-            <li key={location.id} className="checklist-item">
+            <li key={location.id} className="item-card">
               <Link to={`/locations/${location.id}`} className="card-link" style={{ flex: 1 }}>
                 <p className="list-name">{location.name}</p>
                 <p className="list-type">{LOCATION_TYPE_LABELS[location.type]}</p>
