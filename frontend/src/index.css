@@ -89,6 +89,18 @@ h3 {
   margin: 0;
 }
 
+.app-logo {
+  display: block;
+  height: 38px;
+  width: auto;
+}
+
+.login-logo {
+  display: block;
+  width: min(280px, 70vw);
+  height: auto;
+}
+
 .app-main {
   flex: 1;
   padding: 1.5rem 1.5rem 5rem;

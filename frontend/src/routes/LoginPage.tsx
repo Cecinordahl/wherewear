@@ -17,7 +17,9 @@ export default function LoginPage() {
   return (
     <div className="centered">
       <div className="stack" style={{ alignItems: "center" }}>
-        <h1>Wherewear</h1>
+        <h1 style={{ margin: "0 0 0.5rem" }}>
+          <img src="/logo.png" alt="Wherewear" className="login-logo" />
+        </h1>
         <p style={{ color: "var(--text-muted)" }}>
           Hold oversikt over hva du har hvor, og lag pakkelister.
         </p>

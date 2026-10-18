@@ -32,7 +32,9 @@ function AppShell() {
     <BackendWakeGate>
       <div className="app-shell">
         <header className="app-header">
-          <h1>Wherewear</h1>
+          <h1>
+            <img src="/logo.png" alt="Wherewear" className="app-logo" />
+          </h1>
           <button className="icon-btn" onClick={() => void signOut()}>
             Logg ut
           </button>
