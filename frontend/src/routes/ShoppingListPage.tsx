@@ -4,6 +4,7 @@ import { HOME_LOCATION_ID, ONLINE_LOCATION_ID } from "../types";
 import type { CustomStore, Location, ProductCandidate, ShoppingListItem } from "../types";
 import { downloadCalendarReminder } from "../utils/calendar";
 import { KNOWN_STORES } from "../stores";
+import { CalendarIcon, LinkIcon, PencilIcon, TrashIcon } from "../components/Icons";
 import StoreAutocomplete from "../components/StoreAutocomplete";
 
 const ANYWHERE = "";
@@ -206,7 +207,7 @@ export default function ShoppingListPage() {
 
       {dueSoonItems.length > 0 && (
         <div className="card" style={{ borderColor: "var(--danger)" }}>
-          <p className="card-title">🔔 Bør bestilles nå</p>
+          <p className="card-title">Bør bestilles nå</p>
           {dueSoonItems.map((item) => (
             <p key={item.id} className="card-subtitle">
               {item.name} — bestillingsfrist var {item.orderByDate}
@@ -282,7 +283,7 @@ export default function ShoppingListPage() {
               onClick={() => void handleSearchProduct()}
               disabled={searchingProduct}
             >
-              🔍 Søk etter produktlenke hos {storeName.trim()}
+              Søk etter produktlenke hos {storeName.trim()}
             </button>
             {searchingProduct && <p className="card-subtitle">Søker …</p>}
             {productSearchError && <p className="card-subtitle" style={{ color: "var(--danger)" }}>{productSearchError}</p>}
@@ -305,7 +306,9 @@ export default function ShoppingListPage() {
                     {c.imageUrl ? (
                       <img src={c.imageUrl} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6 }} />
                     ) : (
-                      <span style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>🔗</span>
+                      <span style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", flexShrink: 0 }}>
+                        <LinkIcon />
+                      </span>
                     )}
                     <span>
                       <span className="card-title" style={{ fontSize: "0.85rem" }}>{c.title}</span>
@@ -379,8 +382,8 @@ export default function ShoppingListPage() {
           <div key={wardrobeId ?? "none"} style={{ marginTop: "1.2rem" }}>
             <h3 style={{ marginBottom: "0.2rem" }}>
               {wardrobeId
-                ? `${locations.find((l) => l.id === wardrobeId)?.icon ?? "🎯"} ${locationName(wardrobeId)}`
-                : "🎯 Ingen bestemt garderobe"}
+                ? locationName(wardrobeId)
+                : "Ingen bestemt garderobe"}
             </h3>
             <ShoppingListSection
               title="Bestilles på nett"
@@ -426,14 +429,14 @@ export default function ShoppingListPage() {
                 <label style={{ display: "flex", flexDirection: "column" }}>
                   <span>{item.name}</span>
                   {item.neededForLocationId && (
-                    <span className="card-subtitle">🎯 {locationName(item.neededForLocationId)}</span>
+                    <span className="card-subtitle">{locationName(item.neededForLocationId)}</span>
                   )}
                 </label>
                 <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Rediger">
-                  ✎
+                  <PencilIcon />
                 </button>
                 <button className="icon-btn" onClick={() => void handleDelete(item.id)} aria-label="Slett">
-                  ✕
+                  <TrashIcon />
                 </button>
               </li>
             ))}
@@ -477,7 +480,7 @@ function ShoppingListSection({
           if (item.orderByDate) subtitleParts.push(`bestill innen ${item.orderByDate}`);
           if (item.needsDate) {
             subtitleParts.push(
-              <span style={{ color: "var(--danger)" }}>⚠️ Mangler dato for påminnelse</span>
+              <span style={{ color: "var(--danger)" }}>Mangler dato for påminnelse</span>
             );
           }
           return (
@@ -498,19 +501,19 @@ function ShoppingListSection({
               </label>
               {link && (
                 <a href={link} target="_blank" rel="noreferrer" className="icon-btn" title="Åpne lenke">
-                  🔗
+                  <LinkIcon />
                 </a>
               )}
               {item.orderByDate && (
                 <button className="icon-btn" onClick={() => onAddToCalendar(item)} title="Legg til i kalender">
-                  📅
+                  <CalendarIcon />
                 </button>
               )}
               <button className="icon-btn" onClick={() => onEdit(item)} aria-label="Rediger">
-                ✎
+                <PencilIcon />
               </button>
               <button className="icon-btn" onClick={() => onDelete(item.id)} aria-label="Slett">
-                ✕
+                <TrashIcon />
               </button>
             </li>
           );

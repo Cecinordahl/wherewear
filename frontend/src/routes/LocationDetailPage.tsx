@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { categoriesApi, itemsApi, locationsApi } from "../api/endpoints";
-import EmojiPicker from "../components/EmojiPicker";
+import { CameraIcon, PencilIcon, TrashIcon } from "../components/Icons";
 import type { InventoryItem, Location } from "../types";
 import { compressPhoto } from "../utils/image";
 
@@ -24,9 +24,6 @@ export default function LocationDetailPage() {
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [savingCategory, setSavingCategory] = useState(false);
-  const [editingIcon, setEditingIcon] = useState(false);
-  const [iconDraft, setIconDraft] = useState("");
-  const [savingIcon, setSavingIcon] = useState(false);
 
   const loadItems = () => {
     if (!locationId) return;
@@ -134,21 +131,6 @@ export default function LocationDetailPage() {
     }
   };
 
-  const handleSaveIcon = async () => {
-    if (!location) return;
-    setSavingIcon(true);
-    setError(null);
-    try {
-      const updated = await locationsApi.update(location.id, location.name, location.type, iconDraft.trim() || null);
-      setLocation(updated);
-      setEditingIcon(false);
-    } catch {
-      setError("Klarte ikke å lagre emojien.");
-    } finally {
-      setSavingIcon(false);
-    }
-  };
-
   const handleDeleteItem = async (id: string) => {
     setError(null);
     try {
@@ -173,33 +155,7 @@ export default function LocationDetailPage() {
       <Link to="/locations" className="card-subtitle">
         ← Steder
       </Link>
-      <div className="row" style={{ margin: "0.75rem 0 1.75rem", alignItems: "center" }}>
-        <h2 style={{ margin: 0 }}>
-          {location.icon ?? "🎯"} {location.name}
-        </h2>
-        <button
-          className="icon-btn"
-          aria-label="Endre emoji"
-          onClick={() => {
-            setIconDraft(location.icon ?? "");
-            setEditingIcon((open) => !open);
-          }}
-        >
-          ✎
-        </button>
-      </div>
-
-      {editingIcon && (
-        <div className="row" style={{ marginBottom: "0.8rem" }}>
-          <EmojiPicker value={iconDraft} onChange={setIconDraft} />
-          <button type="button" className="btn secondary" onClick={() => void handleSaveIcon()} disabled={savingIcon}>
-            Lagre
-          </button>
-          <button type="button" className="icon-btn" aria-label="Avbryt" onClick={() => setEditingIcon(false)}>
-            ✕
-          </button>
-        </div>
-      )}
+      <h2 style={{ margin: "0.75rem 0 1.75rem" }}>{location.name}</h2>
 
       {error && <div className="error-banner">{error}</div>}
 
@@ -345,7 +301,7 @@ export default function LocationDetailPage() {
                         aria-label="Legg til bilde"
                         title="Legg til bilde"
                       >
-                        📷
+                        <CameraIcon />
                       </Link>
                     )}
                     <span className="item-card-name">
@@ -353,14 +309,14 @@ export default function LocationDetailPage() {
                       {item.brand && <span className="card-subtitle"> · {item.brand}</span>}
                     </span>
                     <button className="icon-btn" onClick={() => startEditItem(item)} aria-label="Rediger">
-                      ✎
+                      <PencilIcon />
                     </button>
                     <button
                       className="icon-btn"
                       onClick={() => void handleDeleteItem(item.id)}
                       aria-label="Slett"
                     >
-                      ✕
+                      <TrashIcon />
                     </button>
                   </li>
                 ))}

@@ -100,7 +100,7 @@ export default function StoreAutocomplete({
               }}
               onClick={() => setAddingNew(true)}
             >
-              ➕ Legg til «{value.trim()}» som ny butikk
+              + Legg til «{value.trim()}» som ny butikk
             </button>
           )}
 

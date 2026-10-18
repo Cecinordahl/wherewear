@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { locationsApi } from "../api/endpoints";
 import type { Location, LocationType } from "../types";
 import { LOCATION_TYPE_LABELS } from "../types";
+import { TrashIcon } from "../components/Icons";
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[] | null>(null);
@@ -81,7 +82,7 @@ export default function LocationsPage() {
                 <p className="list-type">{LOCATION_TYPE_LABELS[location.type]}</p>
               </Link>
               <button className="icon-btn" onClick={() => void handleDelete(location.id)} aria-label="Slett">
-                ✕
+                <TrashIcon />
               </button>
             </li>
           ))}

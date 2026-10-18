@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { locationsApi, packingListsApi } from "../api/endpoints";
 import type { PackingTrip, PackingTrips, Season } from "../types";
 import { SEASON_LABELS } from "../types";
+import { TrashIcon } from "../components/Icons";
 
 function formatTripDate(tripDate: string | null): string {
   if (!tripDate) return "Uten dato";
@@ -291,7 +292,7 @@ export default function PackingListDetailPage() {
                     onClick={() => removeCategory(c.category)}
                     aria-label={`Fjern kategorien ${c.category}`}
                   >
-                    ✕
+                    <TrashIcon />
                   </button>
                 )}
               </div>
@@ -313,7 +314,7 @@ export default function PackingListDetailPage() {
                           onClick={() => removeItem(c.category, item.name)}
                           aria-label="Fjern"
                         >
-                          ✕
+                          <TrashIcon />
                         </button>
                       )}
                     </li>
