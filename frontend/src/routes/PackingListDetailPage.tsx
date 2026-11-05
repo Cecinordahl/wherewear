@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { locationsApi, packingListsApi } from "../api/endpoints";
 import type { PackingTrip, PackingTrips, Season } from "../types";
 import { SEASON_LABELS } from "../types";
-import { TrashIcon } from "../components/Icons";
+import { PencilIcon, TrashIcon } from "../components/Icons";
 
 function formatTripDate(tripDate: string | null): string {
   if (!tripDate) return "Uten dato";
@@ -30,6 +30,8 @@ export default function PackingListDetailPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creating, setCreating] = useState(false);
   const [newTripDate, setNewTripDate] = useState("");
+  // What is being renamed: a category (item undefined) or an item within a category.
+  const [editing, setEditing] = useState<{ category: string; item?: string; text: string } | null>(null);
 
   const applyTrips = useCallback((loaded: PackingTrips, selectId?: string) => {
     setTrips(loaded);
@@ -120,6 +122,35 @@ export default function PackingListDetailPage() {
     if (!name || trip?.categories.some((c) => c.category.toLowerCase() === name.toLowerCase())) return;
     setNewCategoryName("");
     updateCategories((categories) => [...categories, { category: name, items: [] }]);
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    const { category, item, text } = editing;
+    setEditing(null);
+    const name = text.trim();
+    if (!name || name === (item ?? category)) return;
+    if (item === undefined) {
+      if (trip?.categories.some((c) => c.category.toLowerCase() === name.toLowerCase())) return;
+      updateCategories((categories) => categories.map((c) => (c.category !== category ? c : { ...c, category: name })));
+    } else {
+      const existing = trip?.categories.find((c) => c.category === category);
+      if (existing?.items.some((i) => i.name !== item && i.name.toLowerCase() === name.toLowerCase())) return;
+      updateCategories((categories) =>
+        categories.map((c) =>
+          c.category !== category ? c : { ...c, items: c.items.map((i) => (i.name === item ? { ...i, name } : i)) }
+        )
+      );
+    }
+  };
+
+  const editKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      saveEdit();
+    } else if (e.key === "Escape") {
+      setEditing(null);
+    }
   };
 
   const removeCategory = (category: string) => {
@@ -285,15 +316,37 @@ export default function PackingListDetailPage() {
           {trip.categories.map((c) => (
             <div key={c.category} className="category-section">
               <div className="row-between">
-                <p className="category-title">{c.category}</p>
+                {editing && editing.category === c.category && editing.item === undefined ? (
+                  <input
+                    type="text"
+                    className="inline-edit"
+                    autoFocus
+                    value={editing.text}
+                    onChange={(e) => setEditing({ ...editing, text: e.target.value })}
+                    onBlur={saveEdit}
+                    onKeyDown={editKeys}
+                    aria-label="Nytt navn på kategori"
+                  />
+                ) : (
+                  <p className="category-title">{c.category}</p>
+                )}
                 {!readOnly && (
-                  <button
-                    className="icon-btn"
-                    onClick={() => removeCategory(c.category)}
-                    aria-label={`Fjern kategorien ${c.category}`}
-                  >
-                    <TrashIcon />
-                  </button>
+                  <div className="row" style={{ gap: 0 }}>
+                    <button
+                      className="icon-btn"
+                      onClick={() => setEditing({ category: c.category, text: c.category })}
+                      aria-label={`Endre navn på kategorien ${c.category}`}
+                    >
+                      <PencilIcon />
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={() => removeCategory(c.category)}
+                      aria-label={`Fjern kategorien ${c.category}`}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                 )}
               </div>
               {c.items.length > 0 && (
@@ -307,15 +360,37 @@ export default function PackingListDetailPage() {
                         onChange={() => toggleItem(c.category, item.name)}
                         id={`${c.category}-${item.name}`}
                       />
-                      <label htmlFor={`${c.category}-${item.name}`}>{item.name}</label>
+                      {editing && editing.category === c.category && editing.item === item.name ? (
+                        <input
+                          type="text"
+                          className="inline-edit"
+                          autoFocus
+                          value={editing.text}
+                          onChange={(e) => setEditing({ ...editing, text: e.target.value })}
+                          onBlur={saveEdit}
+                          onKeyDown={editKeys}
+                          aria-label="Nytt navn"
+                        />
+                      ) : (
+                        <label htmlFor={`${c.category}-${item.name}`}>{item.name}</label>
+                      )}
                       {!readOnly && (
-                        <button
-                          className="icon-btn"
-                          onClick={() => removeItem(c.category, item.name)}
-                          aria-label="Fjern"
-                        >
-                          <TrashIcon />
-                        </button>
+                        <div className="row" style={{ gap: 0 }}>
+                          <button
+                            className="icon-btn"
+                            onClick={() => setEditing({ category: c.category, item: item.name, text: item.name })}
+                            aria-label="Endre"
+                          >
+                            <PencilIcon />
+                          </button>
+                          <button
+                            className="icon-btn"
+                            onClick={() => removeItem(c.category, item.name)}
+                            aria-label="Fjern"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
                       )}
                     </li>
                   ))}

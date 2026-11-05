@@ -367,6 +367,12 @@ textarea:focus {
   height: 1.15rem;
 }
 
+.inline-edit {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+}
+
 .icon-btn {
   background: none;
   border: none;
