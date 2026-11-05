@@ -242,6 +242,24 @@ textarea:focus {
   align-items: center;
 }
 
+.season-row {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .season-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+
+  .season-row .btn {
+    padding: 0.7rem 0.25rem;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+}
+
 .row-between {
   display: flex;
   justify-content: space-between;
