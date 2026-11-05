@@ -16,6 +16,7 @@ export default function ShoppingListPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [name, setName] = useState("");
   const [locationId, setLocationId] = useState(ANYWHERE);
   const [neededForLocationId, setNeededForLocationId] = useState(ANYWHERE);
@@ -72,6 +73,7 @@ export default function ShoppingListPage() {
   };
 
   const resetForm = () => {
+    setFormOpen(false);
     setEditingId(null);
     setName("");
     setLocationId(ANYWHERE);
@@ -87,6 +89,7 @@ export default function ShoppingListPage() {
 
   const startEdit = (item: ShoppingListItem) => {
     setEditingId(item.id);
+    setFormOpen(true);
     setName(item.name);
     setLocationId(item.locationId ?? ANYWHERE);
     setNeededForLocationId(item.neededForLocationId ?? ANYWHERE);
@@ -216,161 +219,168 @@ export default function ShoppingListPage() {
         </div>
       )}
 
-      <form className="stack card" onSubmit={(e) => void handleAdd(e)}>
-        <input
-          type="text"
-          placeholder="Ny ting å kjøpe, f.eks. Mascara"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      {!formOpen && (
+        <button type="button" className="btn add-toggle" onClick={() => setFormOpen(true)}>
+          + Ny ting å kjøpe
+        </button>
+      )}
 
-        <div>
-          <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
-            Hvor skal det kjøpes?
-          </label>
-          <select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-            <optgroup label="Bestilling">
-              <option value={ONLINE_LOCATION_ID}>Online</option>
-            </optgroup>
-            <optgroup label="Standard">
-              <option value={HOME_LOCATION_ID}>Hjemme</option>
-              <option value={ANYWHERE}>Hvor som helst</option>
-            </optgroup>
-            <optgroup label="Steder">
+      {formOpen && (
+        <form className="stack card" onSubmit={(e) => void handleAdd(e)}>
+          <input
+            type="text"
+            autoFocus
+            placeholder="Ny ting å kjøpe, f.eks. Mascara"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <div>
+            <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
+              Hvor skal det kjøpes?
+            </label>
+            <select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
+              <optgroup label="Bestilling">
+                <option value={ONLINE_LOCATION_ID}>Online</option>
+              </optgroup>
+              <optgroup label="Standard">
+                <option value={HOME_LOCATION_ID}>Hjemme</option>
+                <option value={ANYWHERE}>Hvor som helst</option>
+              </optgroup>
+              <optgroup label="Steder">
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+
+          <div>
+            <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
+              Hvilken garderobe trengs det til?
+            </label>
+            <select value={neededForLocationId} onChange={(e) => setNeededForLocationId(e.target.value)}>
+              <option value={ANYWHERE}>Ingen bestemt</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name}
                 </option>
               ))}
-            </optgroup>
-          </select>
-        </div>
+            </select>
+          </div>
 
-        <div>
-          <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
-            Hvilken garderobe trengs det til?
-          </label>
-          <select value={neededForLocationId} onChange={(e) => setNeededForLocationId(e.target.value)}>
-            <option value={ANYWHERE}>Ingen bestemt</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
-            Butikk (valgfritt)
-          </label>
-          <StoreAutocomplete
-            value={storeName}
-            onChange={(value) => {
-              setStoreName(value);
-              setProductCandidates(null);
-            }}
-            customStores={customStores}
-            onAddStore={(newName, newUrl) => void handleAddStore(newName, newUrl)}
-          />
-        </div>
-
-        {name.trim() && storeName.trim() && (
           <div>
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={() => void handleSearchProduct()}
-              disabled={searchingProduct}
-            >
-              Søk etter produktlenke hos {storeName.trim()}
-            </button>
-            {searchingProduct && <p className="card-subtitle">Søker …</p>}
-            {productSearchError && <p className="card-subtitle" style={{ color: "var(--danger)" }}>{productSearchError}</p>}
-            {productCandidates !== null && productCandidates.length === 0 && !searchingProduct && (
-              <p className="card-subtitle">Fant ingen treff. Lim inn lenken manuelt under.</p>
-            )}
-            {productCandidates && productCandidates.length > 0 && (
-              <div className="stack" style={{ marginTop: "0.4rem" }}>
-                {productCandidates.map((c, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="card"
-                    style={{ padding: "0.6rem", textAlign: "left", cursor: "pointer", display: "flex", gap: "0.6rem", alignItems: "center" }}
-                    onClick={() => {
-                      setProductUrl(c.pageUrl ?? "");
-                      setProductCandidates(null);
-                    }}
-                  >
-                    {c.imageUrl ? (
-                      <img src={c.imageUrl} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6 }} />
-                    ) : (
-                      <span style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", flexShrink: 0 }}>
-                        <LinkIcon />
-                      </span>
-                    )}
-                    <span>
-                      <span className="card-title" style={{ fontSize: "0.85rem" }}>{c.title}</span>
-                      {c.source && <span className="card-subtitle" style={{ display: "block" }}>{c.source}</span>}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div>
-          <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
-            Lenke til akkurat denne varen (valgfritt)
-          </label>
-          <input
-            type="text"
-            placeholder="https://… (fylles inn automatisk hvis du søker over)"
-            value={productUrl}
-            onChange={(e) => setProductUrl(e.target.value)}
-          />
-        </div>
-
-        {isOnline && (
-          <div className="stack" style={{ paddingLeft: "1.6rem" }}>
-            <label className="row">
-              <input type="checkbox" checked={dateUnknown} onChange={(e) => setDateUnknown(e.target.checked)} />
-              <span>Vet ikke når jeg reiser ennå</span>
+            <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
+              Butikk (valgfritt)
             </label>
-
-            {!dateUnknown && (
-              <div className="row">
-                <div style={{ flex: 1 }}>
-                  <label className="card-subtitle">Neste tur dit</label>
-                  <input type="date" value={tripDate} onChange={(e) => setTripDate(e.target.value)} />
-                </div>
-                <div style={{ width: "6rem" }}>
-                  <label className="card-subtitle">Dager før</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={leadTimeDays}
-                    onChange={(e) => setLeadTimeDays(Number(e.target.value) || 0)}
-                  />
-                </div>
-              </div>
-            )}
+            <StoreAutocomplete
+              value={storeName}
+              onChange={(value) => {
+                setStoreName(value);
+                setProductCandidates(null);
+              }}
+              customStores={customStores}
+              onAddStore={(newName, newUrl) => void handleAddStore(newName, newUrl)}
+            />
           </div>
-        )}
 
-        <div className="row">
-          <button className="btn" type="submit" disabled={saving || !name.trim()}>
-            {editingId ? "Lagre endringer" : "Legg til"}
-          </button>
-          {editingId && (
-            <button type="button" className="btn secondary" onClick={resetForm}>
-              Avbryt redigering
-            </button>
+          {name.trim() && storeName.trim() && (
+            <div>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => void handleSearchProduct()}
+                disabled={searchingProduct}
+              >
+                Søk etter produktlenke hos {storeName.trim()}
+              </button>
+              {searchingProduct && <p className="card-subtitle">Søker …</p>}
+              {productSearchError && <p className="card-subtitle" style={{ color: "var(--danger)" }}>{productSearchError}</p>}
+              {productCandidates !== null && productCandidates.length === 0 && !searchingProduct && (
+                <p className="card-subtitle">Fant ingen treff. Lim inn lenken manuelt under.</p>
+              )}
+              {productCandidates && productCandidates.length > 0 && (
+                <div className="stack" style={{ marginTop: "0.4rem" }}>
+                  {productCandidates.map((c, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="card"
+                      style={{ padding: "0.6rem", textAlign: "left", cursor: "pointer", display: "flex", gap: "0.6rem", alignItems: "center" }}
+                      onClick={() => {
+                        setProductUrl(c.pageUrl ?? "");
+                        setProductCandidates(null);
+                      }}
+                    >
+                      {c.imageUrl ? (
+                        <img src={c.imageUrl} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 6 }} />
+                      ) : (
+                        <span style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", flexShrink: 0 }}>
+                          <LinkIcon />
+                        </span>
+                      )}
+                      <span>
+                        <span className="card-title" style={{ fontSize: "0.85rem" }}>{c.title}</span>
+                        {c.source && <span className="card-subtitle" style={{ display: "block" }}>{c.source}</span>}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
-        </div>
-      </form>
+
+          <div>
+            <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
+              Lenke til akkurat denne varen (valgfritt)
+            </label>
+            <input
+              type="text"
+              placeholder="https://… (fylles inn automatisk hvis du søker over)"
+              value={productUrl}
+              onChange={(e) => setProductUrl(e.target.value)}
+            />
+          </div>
+
+          {isOnline && (
+            <div className="stack" style={{ paddingLeft: "1.6rem" }}>
+              <label className="row">
+                <input type="checkbox" checked={dateUnknown} onChange={(e) => setDateUnknown(e.target.checked)} />
+                <span>Vet ikke når jeg reiser ennå</span>
+              </label>
+
+              {!dateUnknown && (
+                <div className="row">
+                  <div style={{ flex: 1 }}>
+                    <label className="card-subtitle">Neste tur dit</label>
+                    <input type="date" value={tripDate} onChange={(e) => setTripDate(e.target.value)} />
+                  </div>
+                  <div style={{ width: "6rem" }}>
+                    <label className="card-subtitle">Dager før</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={leadTimeDays}
+                      onChange={(e) => setLeadTimeDays(Number(e.target.value) || 0)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="row">
+            <button className="btn" type="submit" disabled={saving || !name.trim()}>
+              {editingId ? "Lagre endringer" : "Legg til"}
+            </button>
+            <button type="button" className="btn secondary" onClick={resetForm}>
+              {editingId ? "Avbryt redigering" : "Avbryt"}
+            </button>
+          </div>
+        </form>
+      )}
 
       {wardrobeGroups.map(({ wardrobeId, items: groupItems }) => {
         const onlineItems = groupItems.filter((i) => i.locationId === ONLINE_LOCATION_ID);

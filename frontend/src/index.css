@@ -242,6 +242,11 @@ textarea:focus {
   align-items: center;
 }
 
+.add-toggle {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
 .season-row {
   flex-wrap: wrap;
 }
