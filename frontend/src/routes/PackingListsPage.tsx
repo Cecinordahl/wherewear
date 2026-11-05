@@ -37,7 +37,7 @@ export default function PackingListsPage() {
       {locations.map((location) => (
         <div key={location.id} className="card">
           <p className="card-title">{location.name}</p>
-          <div className="row" style={{ flexWrap: "wrap" }}>
+          <div className="row season-row">
             {SEASONS.map((season) => (
               <Link
                 key={season}
