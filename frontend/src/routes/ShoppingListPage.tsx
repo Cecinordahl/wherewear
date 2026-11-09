@@ -521,57 +521,109 @@ function ShoppingListSection({
 }) {
   if (items.length === 0) return null;
 
+  // Group by shop (case-insensitive) so everything for e.g. Mercadona is together;
+  // items without a shop come last.
+  const storeGroups: { store: string | null; items: ShoppingListItem[] }[] = [];
+  for (const item of items) {
+    const store = item.storeName?.trim() || null;
+    const group = storeGroups.find((g) => (g.store ?? "").toLowerCase() === (store ?? "").toLowerCase());
+    if (group) group.items.push(item);
+    else storeGroups.push({ store, items: [item] });
+  }
+  storeGroups.sort((a, b) =>
+    a.store === null ? 1 : b.store === null ? -1 : a.store.localeCompare(b.store, "nb")
+  );
+  const showStoreHeadings = storeGroups.some((g) => g.store !== null);
+
   return (
     <div className="category-section">
       <p className="category-title">{title}</p>
-      <ul className="item-cards">
-        {items.map((item) => {
-          const link = item.productUrl || item.storeUrl;
-          const subtitleParts: React.ReactNode[] = [];
-          if (showLocationTag) subtitleParts.push(locationName(item.locationId));
-          if (item.storeName) subtitleParts.push(item.storeName);
-          if (item.orderByDate) subtitleParts.push(`bestill innen ${item.orderByDate}`);
-          if (item.needsDate) {
-            subtitleParts.push(
-              <span style={{ color: "var(--danger)" }}>Mangler dato for påminnelse</span>
-            );
-          }
-          return (
-            <li key={item.id} className="item-card">
-              <input type="checkbox" checked={item.checked} onChange={() => onToggle(item)} />
-              <label style={{ display: "flex", flexDirection: "column" }}>
-                <span>{item.name}</span>
-                {subtitleParts.length > 0 && (
-                  <span className="card-subtitle">
-                    {subtitleParts.map((part, i) => (
-                      <span key={i}>
-                        {i > 0 && " · "}
-                        {part}
-                      </span>
-                    ))}
-                  </span>
-                )}
-              </label>
-              {link && (
-                <a href={link} target="_blank" rel="noreferrer" className="icon-btn" title="Åpne lenke">
-                  <LinkIcon />
-                </a>
-              )}
-              {item.orderByDate && (
-                <button className="icon-btn" onClick={() => onAddToCalendar(item)} title="Legg til i kalender">
-                  <CalendarIcon />
-                </button>
-              )}
-              <button className="icon-btn" onClick={() => onEdit(item)} aria-label="Rediger">
-                <PencilIcon />
-              </button>
-              <button className="icon-btn" onClick={() => onDelete(item.id)} aria-label="Slett">
-                <TrashIcon />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      {storeGroups.map((group) => (
+        <div key={group.store ?? "none"} className="store-group">
+          {showStoreHeadings && (
+            <p className="store-title">
+              {group.store ?? "Uten butikk"} <span className="store-count">{group.items.length}</span>
+            </p>
+          )}
+          <ShoppingItemCards
+            items={group.items}
+            locationName={locationName}
+            onToggle={onToggle}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onAddToCalendar={onAddToCalendar}
+            showLocationTag={showLocationTag}
+          />
+        </div>
+      ))}
     </div>
+  );
+}
+
+function ShoppingItemCards({
+  items,
+  locationName,
+  onToggle,
+  onEdit,
+  onDelete,
+  onAddToCalendar,
+  showLocationTag,
+}: {
+  items: ShoppingListItem[];
+  locationName: (id: string | null) => string;
+  onToggle: (item: ShoppingListItem) => void;
+  onEdit: (item: ShoppingListItem) => void;
+  onDelete: (id: string) => void;
+  onAddToCalendar: (item: ShoppingListItem) => void;
+  showLocationTag?: boolean;
+}) {
+  return (
+    <ul className="item-cards">
+      {items.map((item) => {
+        const link = item.productUrl || item.storeUrl;
+        const subtitleParts: React.ReactNode[] = [];
+        if (showLocationTag) subtitleParts.push(locationName(item.locationId));
+        if (item.orderByDate) subtitleParts.push(`bestill innen ${item.orderByDate}`);
+        if (item.needsDate) {
+          subtitleParts.push(
+            <span style={{ color: "var(--danger)" }}>Mangler dato for påminnelse</span>
+          );
+        }
+        return (
+          <li key={item.id} className="item-card">
+            <input type="checkbox" checked={item.checked} onChange={() => onToggle(item)} />
+            <label style={{ display: "flex", flexDirection: "column" }}>
+              <span>{item.name}</span>
+              {subtitleParts.length > 0 && (
+                <span className="card-subtitle">
+                  {subtitleParts.map((part, i) => (
+                    <span key={i}>
+                      {i > 0 && " · "}
+                      {part}
+                    </span>
+                  ))}
+                </span>
+              )}
+            </label>
+            {link && (
+              <a href={link} target="_blank" rel="noreferrer" className="icon-btn" title="Åpne lenke">
+                <LinkIcon />
+              </a>
+            )}
+            {item.orderByDate && (
+              <button className="icon-btn" onClick={() => onAddToCalendar(item)} title="Legg til i kalender">
+                <CalendarIcon />
+              </button>
+            )}
+            <button className="icon-btn" onClick={() => onEdit(item)} aria-label="Rediger">
+              <PencilIcon />
+            </button>
+            <button className="icon-btn" onClick={() => onDelete(item.id)} aria-label="Slett">
+              <TrashIcon />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

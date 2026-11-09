@@ -247,6 +247,22 @@ textarea:focus {
   margin-bottom: 1rem;
 }
 
+.store-group + .store-group {
+  margin-top: 0.9rem;
+}
+
+.store-title {
+  margin: 0.2rem 0 0.45rem;
+  font-weight: 500;
+  color: var(--espresso);
+}
+
+.store-count {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.85em;
+}
+
 .season-row {
   flex-wrap: wrap;
 }
