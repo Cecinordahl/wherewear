@@ -18,6 +18,8 @@ export default function ShoppingListPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [name, setName] = useState("");
+  // Extra lines when adding several things at once for the same place/shop.
+  const [extraNames, setExtraNames] = useState<string[]>([]);
   const [locationId, setLocationId] = useState(ANYWHERE);
   const [neededForLocationId, setNeededForLocationId] = useState(ANYWHERE);
   const [dateUnknown, setDateUnknown] = useState(false);
@@ -32,6 +34,9 @@ export default function ShoppingListPage() {
   const [productSearchError, setProductSearchError] = useState<string | null>(null);
 
   const isOnline = locationId === ONLINE_LOCATION_ID;
+  const allNames = [name, ...extraNames].map((n) => n.trim()).filter(Boolean);
+  // A product link belongs to one specific item, so it only applies when adding one.
+  const singleItem = allNames.length <= 1;
 
   const load = () => {
     shoppingListApi
@@ -76,6 +81,7 @@ export default function ShoppingListPage() {
     setFormOpen(false);
     setEditingId(null);
     setName("");
+    setExtraNames([]);
     setLocationId(ANYWHERE);
     setNeededForLocationId(ANYWHERE);
     setDateUnknown(false);
@@ -91,6 +97,7 @@ export default function ShoppingListPage() {
     setEditingId(item.id);
     setFormOpen(true);
     setName(item.name);
+    setExtraNames([]);
     setLocationId(item.locationId ?? ANYWHERE);
     setNeededForLocationId(item.neededForLocationId ?? ANYWHERE);
     setStoreName(item.storeName ?? "");
@@ -126,24 +133,26 @@ export default function ShoppingListPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (allNames.length === 0) return;
     setSaving(true);
     setError(null);
     const input = {
-      name: name.trim(),
+      name: allNames[0],
       locationId: locationId || null,
       neededForLocationId: neededForLocationId || null,
       tripDate: isOnline && !dateUnknown && tripDate ? tripDate : null,
       leadTimeDays: isOnline && !dateUnknown && tripDate ? leadTimeDays : null,
       storeName: storeName.trim() || null,
       storeUrl: storeName.trim() ? findStoreUrl(storeName) : null,
-      productUrl: productUrl.trim() || null,
+      productUrl: singleItem ? productUrl.trim() || null : null,
     };
     try {
       if (editingId) {
         await shoppingListApi.update(editingId, input);
       } else {
-        await shoppingListApi.create(input);
+        for (const itemName of allNames) {
+          await shoppingListApi.create({ ...input, name: itemName });
+        }
       }
       resetForm();
       load();
@@ -235,6 +244,38 @@ export default function ShoppingListPage() {
             onChange={(e) => setName(e.target.value)}
           />
 
+          {!editingId && (
+            <>
+              {extraNames.map((extra, i) => (
+                <div key={i} className="row">
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Én ting til"
+                    value={extra}
+                    onChange={(e) => setExtraNames((prev) => prev.map((n, j) => (j === i ? e.target.value : n)))}
+                  />
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={() => setExtraNames((prev) => prev.filter((_, j) => j !== i))}
+                    aria-label="Fjern linjen"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn secondary"
+                style={{ alignSelf: "flex-start" }}
+                onClick={() => setExtraNames((prev) => [...prev, ""])}
+              >
+                + Én ting til
+              </button>
+            </>
+          )}
+
           <div>
             <label className="category-title" style={{ display: "block", marginBottom: "0.3rem" }}>
               Hvor skal det kjøpes?
@@ -286,7 +327,7 @@ export default function ShoppingListPage() {
             />
           </div>
 
-          {name.trim() && storeName.trim() && (
+          {singleItem && name.trim() && storeName.trim() && (
             <div>
               <button
                 type="button"
@@ -332,17 +373,19 @@ export default function ShoppingListPage() {
             </div>
           )}
 
-          <div>
-            <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
-              Lenke til akkurat denne varen (valgfritt)
-            </label>
-            <input
-              type="text"
-              placeholder="https://… (fylles inn automatisk hvis du søker over)"
-              value={productUrl}
-              onChange={(e) => setProductUrl(e.target.value)}
-            />
-          </div>
+          {singleItem && (
+            <div>
+              <label className="card-subtitle" style={{ display: "block", marginBottom: "0.2rem" }}>
+                Lenke til akkurat denne varen (valgfritt)
+              </label>
+              <input
+                type="text"
+                placeholder="https://… (fylles inn automatisk hvis du søker over)"
+                value={productUrl}
+                onChange={(e) => setProductUrl(e.target.value)}
+              />
+            </div>
+          )}
 
           {isOnline && (
             <div className="stack" style={{ paddingLeft: "1.6rem" }}>
@@ -372,8 +415,8 @@ export default function ShoppingListPage() {
           )}
 
           <div className="row">
-            <button className="btn" type="submit" disabled={saving || !name.trim()}>
-              {editingId ? "Lagre endringer" : "Legg til"}
+            <button className="btn" type="submit" disabled={saving || allNames.length === 0}>
+              {editingId ? "Lagre endringer" : allNames.length > 1 ? `Legg til ${allNames.length}` : "Legg til"}
             </button>
             <button type="button" className="btn secondary" onClick={resetForm}>
               {editingId ? "Avbryt redigering" : "Avbryt"}
